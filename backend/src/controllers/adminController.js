@@ -3,6 +3,7 @@ import Submission from '../models/Submission.js';
 import CountryStats from '../models/CountryStats.js';
 import AppError from '../utils/AppError.js';
 import { ErrorCodes } from '../utils/errorCodes.js';
+import { buildSafeSearchRegex } from '../utils/sanitization.js';
 
 class AdminController {
   // ============================================================================
@@ -150,16 +151,17 @@ class AdminController {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 20;
       const skip = (page - 1) * limit;
+      const searchRegex = buildSafeSearchRegex(req.query.search);
       
       // Build filter
       const filter = {};
       if (req.query.role) filter.role = req.query.role;
       if (req.query.country) filter.country = req.query.country;
       if (req.query.status) filter.isActive = req.query.status === 'active';
-      if (req.query.search) {
+      if (searchRegex) {
         filter.$or = [
-          { username: { $regex: req.query.search, $options: 'i' } },
-          { email: { $regex: req.query.search, $options: 'i' } }
+          { username: searchRegex },
+          { email: searchRegex }
         ];
       }
       
@@ -296,17 +298,18 @@ class AdminController {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 20;
       const skip = (page - 1) * limit;
+      const searchRegex = buildSafeSearchRegex(req.query.search);
       
       // Build filter
       const filter = {};
       if (req.query.status) filter.status = req.query.status;
       if (req.query.category) filter.category = req.query.category;
       if (req.query.country) filter.country = req.query.country;
-      if (req.query.search) {
+      if (searchRegex) {
         filter.$or = [
-          { title: { $regex: req.query.search, $options: 'i' } },
-          { publisher: { $regex: req.query.search, $options: 'i' } },
-          { url: { $regex: req.query.search, $options: 'i' } }
+          { title: searchRegex },
+          { publisher: searchRegex },
+          { url: searchRegex }
         ];
       }
       

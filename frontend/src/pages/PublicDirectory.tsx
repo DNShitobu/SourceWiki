@@ -33,6 +33,7 @@ import {
   getReliabilityColor,
 } from "../lib/mock-data";
 import { submissionApi } from "../lib/api";
+import { getSafeExternalUrl, openExternalUrl } from "../lib/safe-url";
 import { toast } from "sonner";
 import {
   Breadcrumb,
@@ -165,6 +166,10 @@ export const PublicDirectory: React.FC = () => {
     // Status filter (already applied in API call, but keep for client-side filtering)
     if (filterStatus !== "all") {
       filtered = filtered.filter((s) => s.status === filterStatus);
+    }
+
+    if (filterReliability !== "all") {
+      filtered = filtered.filter((s) => s.reliability === filterReliability);
     }
 
     // Media type filter
@@ -359,9 +364,9 @@ export const PublicDirectory: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="primary">📗 Primary</SelectItem>
-                <SelectItem value="secondary">📘 Secondary</SelectItem>
-                <SelectItem value="unreliable">🚫 Unreliable</SelectItem>
+                <SelectItem value="primary">Primary</SelectItem>
+                <SelectItem value="secondary">Secondary</SelectItem>
+                <SelectItem value="unreliable">Unreliable</SelectItem>
               </SelectContent>
             </Select>
 
@@ -374,8 +379,8 @@ export const PublicDirectory: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Reliability</SelectItem>
-                <SelectItem value="credible">✅ Credible</SelectItem>
-                <SelectItem value="unreliable">❌ Unreliable</SelectItem>
+                <SelectItem value="credible">Credible</SelectItem>
+                <SelectItem value="unreliable">Unreliable</SelectItem>
               </SelectContent>
             </Select>
 
@@ -385,8 +390,8 @@ export const PublicDirectory: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Media Types</SelectItem>
-                <SelectItem value="url">🔗 URL</SelectItem>
-                <SelectItem value="pdf">📄 PDF</SelectItem>
+                <SelectItem value="url">URL</SelectItem>
+                <SelectItem value="pdf">PDF</SelectItem>
               </SelectContent>
             </Select>
 
@@ -458,7 +463,7 @@ export const PublicDirectory: React.FC = () => {
                         variant="outline"
                         className={getReliabilityColor(submission.reliability)}
                       >
-                        {submission.reliability === "credible" ? "✅" : "❌"}
+                        {submission.reliability === "credible" ? "Credible" : "Unreliable"}
                       </Badge>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -513,7 +518,7 @@ export const PublicDirectory: React.FC = () => {
                   </Tooltip>
 
                   <Badge variant="outline">
-                    {submission.mediaType === "pdf" ? "📄" : "🔗"}
+                    {submission.mediaType === "pdf" ? "PDF" : "URL"}
                   </Badge>
                 </div>
 
@@ -522,7 +527,8 @@ export const PublicDirectory: React.FC = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => window.open(submission.url, "_blank")}
+                      onClick={() => openExternalUrl(submission.url)}
+                      disabled={!getSafeExternalUrl(submission.url)}
                       aria-label="Open source"
                     >
                       <ExternalLink className="h-4 w-4" />
@@ -535,7 +541,7 @@ export const PublicDirectory: React.FC = () => {
 
                 {submission.wikipediaArticle && (
                   <a
-                    href={submission.wikipediaArticle}
+                    href={getSafeExternalUrl(submission.wikipediaArticle) ?? undefined}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center space-x-2 text-sm text-gray-600 hover:underline"
@@ -609,8 +615,8 @@ export const PublicDirectory: React.FC = () => {
                           )}
                         >
                           {submission.reliability === "credible"
-                            ? "✅ Credible"
-                            : "❌ Unreliable"}
+                            ? "Credible"
+                            : "Unreliable"}
                         </Badge>
                       </TableCell>
                       <TableCell className="whitespace-nowrap text-sm">
@@ -620,7 +626,8 @@ export const PublicDirectory: React.FC = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => window.open(submission.url, "_blank")}
+                          onClick={() => openExternalUrl(submission.url)}
+                          disabled={!getSafeExternalUrl(submission.url)}
                         >
                           <ExternalLink className="h-4 w-4" />
                         </Button>

@@ -230,10 +230,10 @@ export const submissionApi = {
   delete: (id: string) => api.delete(`/submissions/${id}`),
 
   verify: (id: string, status: string, credibility?: string, verifierNotes?: string) => {
-    console.log('🔴 API verify call:', { id, status, credibility, verifierNotes });
-    console.log('🔴 API URL being used:', `${API_URL}/submissions/${id}/verify`);
+    console.log('API verify call:', { id, status, credibility, verifierNotes });
+    console.log('API URL being used:', `${API_URL}/submissions/${id}/verify`);
     const payload = { status, credibility, verifierNotes };
-    console.log('🔴 Payload being sent:', payload);
+    console.log('Payload being sent:', payload);
     return api.put(`/submissions/${id}/verify`, payload);
   },
 

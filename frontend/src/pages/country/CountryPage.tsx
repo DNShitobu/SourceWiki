@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { references } from '../../lib/references';
+import { getSafeExternalUrl } from '../../lib/safe-url';
 
 export default function CountryPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -27,7 +28,7 @@ export default function CountryPage() {
               <h3 className="font-semibold">{ref.title}</h3>
               <p className="text-sm text-gray-500">{ref.source}</p>
               <a
-                href={ref.url}
+                href={getSafeExternalUrl(ref.url) ?? undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 text-sm"

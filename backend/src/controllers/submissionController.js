@@ -2,6 +2,7 @@ import Submission from '../models/Submission.js';
 import User from '../models/User.js';
 import AppError from '../utils/AppError.js';
 import { ErrorCodes } from '../utils/errorCodes.js';
+import { buildSafeSearchRegex } from '../utils/sanitization.js';
 // 1. IMPORT THE EMAIL SERVICE
 import { sendEmail } from '../services/emailService.js';
 
@@ -82,16 +83,17 @@ export const createSubmission = async (req, res, next) => {
 export const getSubmissions = async (req, res, next) => {
   try {
     const { country, category, status, page = 1, limit = 20, search } = req.query;
+    const searchRegex = buildSafeSearchRegex(search);
 
     const query = {};
 
     if (country) query.country = country;
     if (category) query.category = category;
     if (status) query.status = status;
-    if (search) {
+    if (searchRegex) {
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { publisher: { $regex: search, $options: 'i' } }
+        { title: searchRegex },
+        { publisher: searchRegex }
       ];
     }
 
@@ -241,7 +243,6 @@ export const deleteSubmission = async (req, res, next) => {
 export const verifySubmission = async (req, res, next) => {
   try {
     const { status, credibility, verifierNotes } = req.body;
-    console.log('Verification request:', { status, credibility, verifierNotes });
 
     let submission = await Submission.findById(req.params.id);
 

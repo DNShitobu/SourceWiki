@@ -11,7 +11,12 @@ import {
   getSubmissionStats
 } from '../controllers/submissionController.js';
 import { protect, authorize } from '../middleware/auth.js';
-import { submissionValidation, verificationValidation, validate } from '../middleware/validator.js';
+import {
+  submissionValidation,
+  submissionUpdateValidation,
+  verificationValidation,
+  validate,
+} from '../middleware/validator.js';
 
 const router = express.Router();
 
@@ -25,7 +30,7 @@ router.get('/pending/country', protect, authorize('verifier', 'admin'), getPendi
 
 router.route('/:id')
   .get(getSubmission)
-  .put(protect, updateSubmission)
+  .put(protect, submissionUpdateValidation, validate, updateSubmission)
   .delete(protect, deleteSubmission);
 
 router.put('/:id/verify', protect, authorize('verifier', 'admin'), verificationValidation, validate, verifySubmission);

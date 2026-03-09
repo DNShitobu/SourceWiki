@@ -178,7 +178,7 @@ describe('Users API Integration Tests', () => {
         .set('Authorization', authHeader)
         .send({
           name: 'First Submission',
-          icon: '🎉'
+          icon: 'NEW'
         })
         .expect(200);
 
@@ -196,7 +196,7 @@ describe('Users API Integration Tests', () => {
         .set('Authorization', authHeader)
         .send({
           name: 'First Submission',
-          icon: '🎉'
+          icon: 'NEW'
         })
         .expect(403);
 

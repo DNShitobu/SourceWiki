@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import Submission from '../models/Submission.js';
 import AppError from '../utils/AppError.js';
 import { ErrorCodes } from '../utils/errorCodes.js';
+import { buildSafeSearchRegex } from '../utils/sanitization.js';
 
 // @desc    Get user profile
 // @route   GET /api/users/:id
@@ -149,14 +150,15 @@ export const updateUserRole = async (req, res, next) => {
 export const getUsers = async (req, res, next) => {
   try {
     const { page = 1, limit = 20, role, country, search } = req.query;
+    const searchRegex = buildSafeSearchRegex(search);
 
     const query = {};
     if (role) query.role = role;
     if (country) query.country = country;
-    if (search) {
+    if (searchRegex) {
       query.$or = [
-        { username: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } }
+        { username: searchRegex },
+        { email: searchRegex }
       ];
     }
 

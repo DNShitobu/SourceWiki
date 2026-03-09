@@ -121,7 +121,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">1️⃣</span>
+                <span className="text-2xl font-semibold">1</span>
               </div>
               <h3 className="mb-2">Submit References</h3>
               <p className="text-gray-600">
@@ -132,7 +132,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
             <div className="text-center">
               <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">2️⃣</span>
+                <span className="text-2xl font-semibold">2</span>
               </div>
               <h3 className="mb-2">Community Verification</h3>
               <p className="text-gray-600">
@@ -143,7 +143,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
             <div className="text-center">
               <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">3️⃣</span>
+                <span className="text-2xl font-semibold">3</span>
               </div>
               <h3 className="mb-2">Build Reputation</h3>
               <p className="text-gray-600">
@@ -160,7 +160,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>📗 Source Categorization</CardTitle>
+                <CardTitle>Source Categorization</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
@@ -172,7 +172,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
             <Card>
               <CardHeader>
-                <CardTitle>🌍 Country-Based Review</CardTitle>
+                <CardTitle>Country-Based Review</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
@@ -184,7 +184,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
             <Card>
               <CardHeader>
-                <CardTitle>🔍 Searchable Directory</CardTitle>
+                <CardTitle>Searchable Directory</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
@@ -196,7 +196,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
             <Card>
               <CardHeader>
-                <CardTitle>🏆 Gamification System</CardTitle>
+                <CardTitle>Gamification System</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
@@ -244,9 +244,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                       <tr key={entry.id || entry.username}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            {index === 0 && <span className="text-xl mr-2">🥇</span>}
-                            {index === 1 && <span className="text-xl mr-2">🥈</span>}
-                            {index === 2 && <span className="text-xl mr-2">🥉</span>}
                             <span>{index + 1}</span>
                           </div>
                         </td>

@@ -15,6 +15,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import countryRoutes from './routes/countryRoutes.js';
 import systemRoutes from './routes/systemRoutes.js';
 import reportsRoutes from './routes/reportsRoutes.js';
+import { sanitizeRequestInput } from './utils/sanitization.js';
 //importing the config file where all the environment variables are stored and loaded
 import config from './config/config.js';
 
@@ -75,18 +76,11 @@ app.use(cors({
 
 
 // Body parser
-app.use(express.json());
-app.use((req, res, next) => {
-  console.log('--------------------------------');
-  console.log('DEBUG CHECK:');
-  console.log('Content-Type:', req.get('Content-Type'));
-  console.log('Req Body:', req.body);
-  console.log('--------------------------------');
-  next();
-});
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 // Cookie parser (needed before auth middleware)
 app.use(cookieParser());
+app.use(sanitizeRequestInput);
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

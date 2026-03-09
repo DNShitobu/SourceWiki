@@ -65,10 +65,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({ onNavigate }) => {
     if (!user) return null;
 
     const milestones = [
-      { points: 100, name: 'Contributor', icon: '🌟' },
-      { points: 250, name: 'Regular Contributor', icon: '⭐' },
-      { points: 500, name: 'Expert Contributor', icon: '💎' },
-      { points: 1000, name: 'Elite Contributor', icon: '🏆' },
+      { points: 100, name: 'Contributor', icon: 'C' },
+      { points: 250, name: 'Regular Contributor', icon: 'RC' },
+      { points: 500, name: 'Expert Contributor', icon: 'EC' },
+      { points: 1000, name: 'Elite Contributor', icon: 'EL' },
     ];
 
     const next = milestones.find((m) => m.points > user.points);
@@ -256,7 +256,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ onNavigate }) => {
                     <Card key={badge.id} className="bg-gradient-to-br from-amber-50 to-yellow-50">
                       <CardContent className="pt-6">
                         <div className="text-center">
-                          <div className="text-5xl mb-3">{badge.icon}</div>
+                          <div className="text-3xl font-semibold tracking-wide mb-3">{badge.icon}</div>
                           <h4 className="mb-1">{badge.name}</h4>
                           <p className="text-sm text-gray-600">{badge.description}</p>
                         </div>
@@ -283,7 +283,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ onNavigate }) => {
                     <Card key={badge.id} className="bg-gray-50 opacity-60">
                       <CardContent className="pt-6">
                         <div className="text-center">
-                          <div className="text-5xl mb-3 grayscale">{badge.icon}</div>
+                          <div className="text-3xl font-semibold tracking-wide mb-3 grayscale">{badge.icon}</div>
                           <h4 className="mb-1 text-gray-600">{badge.name}</h4>
                           <p className="text-sm text-gray-500">{badge.description}</p>
                         </div>
@@ -347,7 +347,6 @@ export const UserProfile: React.FC<UserProfileProps> = ({ onNavigate }) => {
                                       : 'bg-red-100 text-red-800 border-red-300'
                                   }
                                 >
-                                  {submission.reliability === 'credible' ? '✅' : '❌'}{' '}
                                   {submission.reliability}
                                 </Badge>
                               )}

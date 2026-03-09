@@ -41,44 +41,44 @@ export interface Country {
 
 export const COUNTRIES: Country[] = [
   // African Countries (Primary Focus)
-  { code: 'GH', name: 'Ghana', flag: '🇬🇭' },
-  { code: 'NG', name: 'Nigeria', flag: '🇳🇬' },
-  { code: 'KE', name: 'Kenya', flag: '🇰🇪' },
-  { code: 'ZA', name: 'South Africa', flag: '🇿🇦' },
-  { code: 'EG', name: 'Egypt', flag: '🇪🇬' },
-  { code: 'ET', name: 'Ethiopia', flag: '🇪🇹' },
-  { code: 'MA', name: 'Morocco', flag: '🇲🇦' },
-  { code: 'TN', name: 'Tunisia', flag: '🇹🇳' },
-  { code: 'UG', name: 'Uganda', flag: '🇺🇬' },
-  { code: 'TZ', name: 'Tanzania', flag: '🇹🇿' },
-  { code: 'RW', name: 'Rwanda', flag: '🇷🇼' },
-  { code: 'MZ', name: 'Mozambique', flag: '🇲🇿' },
-  { code: 'MG', name: 'Madagascar', flag: '🇲🇬' },
+  { code: 'GH', name: 'Ghana', flag: 'GH' },
+  { code: 'NG', name: 'Nigeria', flag: 'NG' },
+  { code: 'KE', name: 'Kenya', flag: 'KE' },
+  { code: 'ZA', name: 'South Africa', flag: 'ZA' },
+  { code: 'EG', name: 'Egypt', flag: 'EG' },
+  { code: 'ET', name: 'Ethiopia', flag: 'ET' },
+  { code: 'MA', name: 'Morocco', flag: 'MA' },
+  { code: 'TN', name: 'Tunisia', flag: 'TN' },
+  { code: 'UG', name: 'Uganda', flag: 'UG' },
+  { code: 'TZ', name: 'Tanzania', flag: 'TZ' },
+  { code: 'RW', name: 'Rwanda', flag: 'RW' },
+  { code: 'MZ', name: 'Mozambique', flag: 'MZ' },
+  { code: 'MG', name: 'Madagascar', flag: 'MG' },
   
   // Other Countries
-  { code: 'US', name: 'United States', flag: '🇺🇸' },
-  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
-  { code: 'CA', name: 'Canada', flag: '🇨🇦' },
-  { code: 'AU', name: 'Australia', flag: '🇦🇺' },
-  { code: 'DE', name: 'Germany', flag: '🇩🇪' },
-  { code: 'FR', name: 'France', flag: '🇫🇷' },
-  { code: 'ES', name: 'Spain', flag: '🇪🇸' },
-  { code: 'IT', name: 'Italy', flag: '🇮🇹' },
-  { code: 'JP', name: 'Japan', flag: '🇯🇵' },
-  { code: 'IN', name: 'India', flag: '🇮🇳' },
-  { code: 'BR', name: 'Brazil', flag: '🇧🇷' },
-  { code: 'MX', name: 'Mexico', flag: '🇲🇽' },
-  { code: 'KR', name: 'South Korea', flag: '🇰🇷' },
-  { code: 'CN', name: 'China', flag: '🇨🇳' },
+  { code: 'US', name: 'United States', flag: 'US' },
+  { code: 'GB', name: 'United Kingdom', flag: 'GB' },
+  { code: 'CA', name: 'Canada', flag: 'CA' },
+  { code: 'AU', name: 'Australia', flag: 'AU' },
+  { code: 'DE', name: 'Germany', flag: 'DE' },
+  { code: 'FR', name: 'France', flag: 'FR' },
+  { code: 'ES', name: 'Spain', flag: 'ES' },
+  { code: 'IT', name: 'Italy', flag: 'IT' },
+  { code: 'JP', name: 'Japan', flag: 'JP' },
+  { code: 'IN', name: 'India', flag: 'IN' },
+  { code: 'BR', name: 'Brazil', flag: 'BR' },
+  { code: 'MX', name: 'Mexico', flag: 'MX' },
+  { code: 'KR', name: 'South Korea', flag: 'KR' },
+  { code: 'CN', name: 'China', flag: 'CN' },
 ];
 
 export const BADGES = [
-  { id: 'first-submission', name: 'First Submission', icon: '🌟', description: 'Submitted your first reference' },
-  { id: '10-verified', name: '10 Verified Sources', icon: '✅', description: 'Had 10 sources verified' },
-  { id: 'country-expert', name: 'Country Expert', icon: '🏆', description: 'Top contributor in a country' },
-  { id: 'early-adopter', name: 'Early Adopter', icon: '🚀', description: 'One of the first users' },
-  { id: 'super-verifier', name: 'Super Verifier', icon: '⭐', description: 'Verified 50+ sources' },
-  { id: 'quality-contributor', name: 'Quality Contributor', icon: '💎', description: '90% verification success rate' },
+  { id: 'first-submission', name: 'First Submission', icon: 'NEW', description: 'Submitted your first reference' },
+  { id: '10-verified', name: '10 Verified Sources', icon: 'V10', description: 'Had 10 sources verified' },
+  { id: 'country-expert', name: 'Country Expert', icon: 'TOP', description: 'Top contributor in a country' },
+  { id: 'early-adopter', name: 'Early Adopter', icon: 'EARLY', description: 'One of the first users' },
+  { id: 'super-verifier', name: 'Super Verifier', icon: 'SV', description: 'Verified 50+ sources' },
+  { id: 'quality-contributor', name: 'Quality Contributor', icon: 'QC', description: '90% verification success rate' },
 ];
 
 export const mockUsers: User[] = [
@@ -334,15 +334,15 @@ export const getCountryName = (code: string): string => {
 };
 
 export const getCountryFlag = (code: string): string => {
-  return COUNTRIES.find(c => c.code === code)?.flag || '🌍';
+  return COUNTRIES.find(c => c.code === code)?.flag || '--';
 };
 
 export const getCategoryIcon = (category: string): string => {
   switch (category) {
-    case 'primary': return '📗';
-    case 'secondary': return '📘';
-    case 'unreliable': return '🚫';
-    default: return '📄';
+    case 'primary': return 'PRI';
+    case 'secondary': return 'SEC';
+    case 'unreliable': return 'UNR';
+    default: return 'DOC';
   }
 };
 

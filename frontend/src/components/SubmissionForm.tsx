@@ -21,6 +21,7 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { useAuth } from "../lib/auth-context";
 import { COUNTRIES } from "../lib/mock-data";
 import { submissionApi } from "../lib/api";
+import { getSafeExternalUrl } from "../lib/safe-url";
 import { toast } from "sonner";
 import {
   Upload,
@@ -67,12 +68,7 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
   };
 
   const validateUrl = (urlString: string): boolean => {
-    try {
-      new URL(urlString);
-      return true;
-    } catch {
-      return false;
-    }
+    return getSafeExternalUrl(urlString) !== null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -105,19 +101,34 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
       return;
     }
 
+    const safeSourceUrl =
+      submissionType === "url"
+        ? getSafeExternalUrl(url)
+        : `https://uploads.wikisource.org/${fileName}`;
+    const safeWikipediaArticle = wikipediaArticle
+      ? getSafeExternalUrl(wikipediaArticle)
+      : null;
+
+    if (submissionType === "url" && !safeSourceUrl) {
+      toast.error("Please enter a valid http or https URL");
+      return;
+    }
+
+    if (wikipediaArticle && !safeWikipediaArticle) {
+      toast.error("Please enter a valid Wikipedia article URL");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const response = await submissionApi.create({
-        url:
-          submissionType === "url"
-            ? url
-            : `https://uploads.wikisource.org/${fileName}`,
+        url: safeSourceUrl!,
         title,
         publisher,
         country,
         category,
-        wikipediaArticle: wikipediaArticle || undefined,
+        wikipediaArticle: safeWikipediaArticle || undefined,
         fileType: submissionType,
         fileName: submissionType === "pdf" ? fileName : undefined,
       });
@@ -321,7 +332,7 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
                     className="cursor-pointer flex-1"
                   >
                     <div className="flex items-center space-x-2 mb-1">
-                      <span className="text-xl">📗</span>
+                      <span className="text-sm font-semibold tracking-wide">PRI</span>
                       <span>Primary Source</span>
                     </div>
                     <p className="text-sm text-gray-500">
@@ -341,7 +352,7 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
                     className="cursor-pointer flex-1"
                   >
                     <div className="flex items-center space-x-2 mb-1">
-                      <span className="text-xl">📘</span>
+                      <span className="text-sm font-semibold tracking-wide">SEC</span>
                       <span>Secondary Source</span>
                     </div>
                     <p className="text-sm text-gray-500">
@@ -361,7 +372,7 @@ export const SubmissionForm: React.FC<SubmissionFormProps> = ({
                     className="cursor-pointer flex-1"
                   >
                     <div className="flex items-center space-x-2 mb-1">
-                      <span className="text-xl">🚫</span>
+                      <span className="text-sm font-semibold tracking-wide">UNR</span>
                       <span>Potentially Unreliable</span>
                     </div>
                     <p className="text-sm text-gray-500">

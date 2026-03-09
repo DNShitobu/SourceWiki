@@ -581,7 +581,7 @@ Get a user's public profile and statistics.
     "badges": [
       {
         "name": "First Submission",
-        "icon": "🎯",
+        "icon": "TARGET",
         "earnedAt": "2025-01-15T10:30:00.000Z"
       }
     ],
@@ -672,7 +672,7 @@ Award a badge to a user (admin only).
 ```json
 {
   "name": "Top Contributor",
-  "icon": "🏆"
+  "icon": "TOP"
 }
 ```
 

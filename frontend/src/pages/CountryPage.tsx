@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { COUNTRIES, getCountryName, getCountryFlag, getSubmissions, getCategoryIcon, getReliabilityColor, getStatusColor } from '../lib/mock-data';
 import { fetchWikidataCountryMetadata, WikidataCountryMetadata } from '../lib/wikidata-service';
 import { submissionApi } from '../lib/api';
+import { getSafeExternalUrl } from '../lib/safe-url';
 
 interface CountryPageProps {}
 
@@ -20,7 +21,10 @@ export const CountryPage: React.FC<CountryPageProps> = () => {
 
   const country = COUNTRIES.find(c => c.code === countryCode);
   const countryName = country ? country.name : 'Unknown Country';
-  const countryFlag = country ? country.flag : '🌍';
+  const countryFlag = country ? country.flag : '--';
+  const fallbackWikipediaUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(countryName.replace(/ /g, '_'))}`;
+  const safeWikipediaMetadataUrl = getSafeExternalUrl(countryMetadata?.wikipediaUrl);
+  const safeWikidataMetadataUrl = getSafeExternalUrl(countryMetadata?.wikidataUrl);
 
   useEffect(() => {
     const loadCountryData = async () => {
@@ -127,7 +131,9 @@ export const CountryPage: React.FC<CountryPageProps> = () => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <div className="text-6xl">{countryFlag}</div>
+            <div className="min-w-16 rounded-full bg-slate-100 px-4 py-3 text-xl font-semibold tracking-wide text-slate-700 text-center">
+              {countryFlag}
+            </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
                 {countryMetadata?.officialName || countryName}
@@ -178,22 +184,20 @@ export const CountryPage: React.FC<CountryPageProps> = () => {
           {/* Wikipedia/Wikidata Links */}
           <div className="mt-4 flex items-center space-x-4">
             <a
-              href={countryMetadata?.wikipediaUrl || `https://en.wikipedia.org/wiki/${countryName.replace(/ /g, '_')}`}
+              href={safeWikipediaMetadataUrl || fallbackWikipediaUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm"
             >
-              <span>📖</span>
               <span>Wikipedia Article</span>
               <ExternalLink className="h-3 w-3" />
             </a>
             <a
-              href={countryMetadata?.wikidataUrl || 'https://www.wikidata.org/'}
+              href={safeWikidataMetadataUrl || 'https://www.wikidata.org/'}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm"
             >
-              <span>🗃️</span>
               <span>Wikidata</span>
               <ExternalLink className="h-3 w-3" />
             </a>
@@ -294,12 +298,12 @@ export const CountryPage: React.FC<CountryPageProps> = () => {
                           )}
                           {submission.wikipediaArticle && (
                             <a
-                              href={submission.wikipediaArticle}
+                              href={getSafeExternalUrl(submission.wikipediaArticle) ?? undefined}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex items-center space-x-1 text-blue-600 hover:text-blue-800"
                             >
-                              <span>📖 Wikipedia Article</span>
+                              <span>Wikipedia Article</span>
                               <ExternalLink className="h-3 w-3" />
                             </a>
                           )}
@@ -322,7 +326,7 @@ export const CountryPage: React.FC<CountryPageProps> = () => {
                         <Badge variant="outline">{submission.category}</Badge>
                       </div>
                       <a
-                        href={submission.url}
+                        href={getSafeExternalUrl(submission.url) ?? undefined}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm"
@@ -380,7 +384,7 @@ export const CountryPage: React.FC<CountryPageProps> = () => {
                         <Badge variant="outline">{submission.category}</Badge>
                       </div>
                       <a
-                        href={submission.url}
+                        href={getSafeExternalUrl(submission.url) ?? undefined}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm"
@@ -436,7 +440,7 @@ export const CountryPage: React.FC<CountryPageProps> = () => {
                         <Badge variant="outline">{submission.category}</Badge>
                       </div>
                       <a
-                        href={submission.url}
+                        href={getSafeExternalUrl(submission.url) ?? undefined}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm"

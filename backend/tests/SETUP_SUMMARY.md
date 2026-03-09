@@ -1,6 +1,6 @@
 # Jest Testing Setup Summary
 
-## ✅ Completed Setup
+## Completed Setup
 
 ### 1. Dependencies Installed
 - `jest` - Testing framework
@@ -62,7 +62,7 @@
 ### 6. Documentation
 - **`tests/README.md`** - Comprehensive testing documentation
 
-## 🚀 Running Tests
+## Running Tests
 
 ### Basic Test Run
 ```bash
@@ -84,7 +84,7 @@ npm run test:coverage
 npm run test:integration
 ```
 
-## 📋 Test Features
+## Test Features
 
 ### Automatic Database Management
 - Uses MongoDB Memory Server (no external database required)
@@ -103,7 +103,7 @@ npm run test:integration
 - Create authorization headers for authenticated requests
 - Support for both access and refresh tokens
 
-## 📝 Test Structure
+## Test Structure
 
 ```
 tests/
@@ -117,7 +117,7 @@ tests/
     └── testHelpers.js
 ```
 
-## ⚙️ Environment Variables
+## Environment Variables
 
 Tests use an in-memory MongoDB, but you may need these for JWT token generation:
 - `JWT_SECRET` - Secret for access tokens
@@ -125,7 +125,7 @@ Tests use an in-memory MongoDB, but you may need these for JWT token generation:
 
 These can be set in a `.env` file or as environment variables.
 
-## 🎯 Next Steps
+## Next Steps
 
 1. **Run the tests** to verify everything works:
    ```bash
@@ -142,7 +142,7 @@ These can be set in a `.env` file or as environment variables.
    - Configure test coverage reporting
    - Set up test notifications
 
-## 📚 Resources
+## Resources
 
 - [Jest Documentation](https://jestjs.io/docs/getting-started)
 - [Supertest Documentation](https://github.com/visionmedia/supertest)

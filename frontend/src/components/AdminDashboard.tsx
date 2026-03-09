@@ -28,6 +28,7 @@ import {
   getStatusColor,
 } from '../lib/mock-data';
 import { submissionApi } from '../lib/api';
+import { getSafeExternalUrl, openExternalUrl } from '../lib/safe-url';
 import { toast } from 'sonner';
 
 interface Submission {
@@ -90,10 +91,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
   const handleVerify = async (submission: Submission, status: 'approved' | 'rejected', credibility?: 'credible' | 'unreliable') => {
     if (!user) return;
 
-    console.log('🔵 HANDLE VERIFY CALLED');
-    console.log('🔵 Parameters received:', { status, credibility });
-    console.log('🔵 Verification notes from state:', verificationNotes);
-    console.log('🔵 About to send to API:', { 
+    console.log('Handle verify called');
+    console.log('Parameters received:', { status, credibility });
+    console.log('Verification notes from state:', verificationNotes);
+    console.log('About to send to API:', { 
       id: submission.id, 
       status, 
       credibility, 
@@ -112,11 +113,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
       if (response.success) {
         let message = '';
         if (status === 'rejected') {
-          message = '❌ Reference Rejected (+5 points)';
+          message = 'Reference rejected (+5 points)';
         } else if (credibility === 'credible') {
-          message = '✅ Marked as Credible (+5 points)';
+          message = 'Marked as credible (+5 points)';
         } else if (credibility === 'unreliable') {
-          message = '🚫 Marked as Unreliable (+5 points)';
+          message = 'Marked as unreliable (+5 points)';
         }
         
         toast.success(message);
@@ -144,11 +145,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
   };
 
   const handleCredible = async (submission: Submission) => {
-    console.log('🟢 CREDIBLE BUTTON CLICKED');
-    console.log('🟢 Submission object:', submission);
-    console.log('🟢 About to call handleVerify with: approved, credible');
-    console.log('🟢 Verification notes state:', verificationNotes);
-    console.log('🟢 All parameters being passed:', { submission: submission.id, status: 'approved', credibility: 'credible', notes: verificationNotes });
+    console.log('Credible button clicked');
+    console.log('Submission object:', submission);
+    console.log('About to call handleVerify with: approved, credible');
+    console.log('Verification notes state:', verificationNotes);
+    console.log('All parameters being passed:', { submission: submission.id, status: 'approved', credibility: 'credible', notes: verificationNotes });
     await handleVerify(submission, 'approved', 'credible');
   };
 
@@ -237,7 +238,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
         {user.role === 'admin' && (
           <div className="mt-2">
             <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-              🌍 Global Access - All Countries
+              Global Access - All Countries
             </Badge>
           </div>
         )}
@@ -332,11 +333,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                                 {getCountryFlag(submission.country)} {getCountryName(submission.country)}
                               </Badge>
                               <Badge variant="outline">
-                                {submission.mediaType === 'pdf' ? '📄 PDF' : '🔗 URL'}
+                                {submission.mediaType === 'pdf' ? 'PDF' : 'URL'}
                               </Badge>
                             </div>
                             <a
-                              href={submission.url}
+                              href={getSafeExternalUrl(submission.url) ?? undefined}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-sm text-blue-600 hover:underline block mb-2"
@@ -345,12 +346,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                             </a>
                             {submission.wikipediaArticle && (
                               <a
-                                href={submission.wikipediaArticle}
+                                href={getSafeExternalUrl(submission.wikipediaArticle) ?? undefined}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-sm text-gray-500 hover:underline block"
                               >
-                                📖 Wikipedia Article
+                                Wikipedia Article
                               </a>
                             )}
                             <p className="text-sm text-gray-500 mt-2">
@@ -371,7 +372,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                         </Button>
                         <Button
                           variant="outline"
-                          onClick={() => window.open(submission.url, '_blank')}
+                          onClick={() => openExternalUrl(submission.url)}
+                          disabled={!getSafeExternalUrl(submission.url)}
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           View Source
@@ -404,9 +406,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All categories</SelectItem>
-                <SelectItem value="primary">📗 Primary</SelectItem>
-                <SelectItem value="secondary">📘 Secondary</SelectItem>
-                <SelectItem value="unreliable">🚫 Unreliable</SelectItem>
+                <SelectItem value="primary">Primary</SelectItem>
+                <SelectItem value="secondary">Secondary</SelectItem>
+                <SelectItem value="unreliable">Unreliable</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -436,9 +438,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                         >
                           {submission.status === 'approved' 
                             ? submission.credibility === 'credible' 
-                              ? '✅ Credible' 
-                              : '🚫 Unreliable'
-                            : '❌ Rejected'
+                              ? 'Credible' 
+                              : 'Unreliable'
+                            : 'Rejected'
                           }
                         </Badge>
                         <Badge variant="outline">
@@ -446,7 +448,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                         </Badge>
                       </div>
                       <a
-                        href={submission.url}
+                        href={getSafeExternalUrl(submission.url) ?? undefined}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm text-blue-600 hover:underline block mb-2"
@@ -497,7 +499,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                   </Badge>
                 </div>
                 <a
-                  href={selectedSubmission.url}
+                  href={getSafeExternalUrl(selectedSubmission.url) ?? undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-blue-600 hover:underline"
@@ -532,19 +534,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
               onClick={() => selectedSubmission && handleUnreliable(selectedSubmission)}
               className="w-full sm:w-auto"
             >
-              🚫 Mark Unreliable
+              Mark Unreliable
             </Button>
             <Button
               variant="default"
               className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
               onClick={() => {
-                console.log('🔥 BUTTON CLICKED - selectedSubmission:', selectedSubmission);
+                console.log('Button clicked - selectedSubmission:', selectedSubmission);
                 if (selectedSubmission) {
                   handleCredible(selectedSubmission);
                 }
               }}
             >
-              ✅ Mark Credible
+              Mark Credible
             </Button>
           </DialogFooter>
         </DialogContent>

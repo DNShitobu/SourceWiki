@@ -141,12 +141,12 @@ it('should get public data', async () => {
 ## Test Coverage
 
 The test suite aims for comprehensive coverage of:
-- ✅ Authentication endpoints (register, login, logout, profile)
-- ✅ Submission CRUD operations
-- ✅ User management endpoints
-- ✅ Authorization and role-based access control
-- ✅ Input validation
-- ✅ Error handling
+- Authentication endpoints (register, login, logout, profile)
+- Submission CRUD operations
+- User management endpoints
+- Authorization and role-based access control
+- Input validation
+- Error handling
 
 ## Environment Variables
 

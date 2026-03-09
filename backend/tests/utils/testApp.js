@@ -13,6 +13,7 @@ import adminRoutes from '../../src/routes/adminRoutes.js';
 import countryRoutes from '../../src/routes/countryRoutes.js';
 import systemRoutes from '../../src/routes/systemRoutes.js';
 import reportsRoutes from '../../src/routes/reportsRoutes.js';
+import { sanitizeRequestInput } from '../../src/utils/sanitization.js';
 
 /**
  * Create a test Express app instance
@@ -46,8 +47,9 @@ export const createTestApp = () => {
   app.use('/api/', userRateLimiter);
 
   // Body parser
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json({ limit: '100kb' }));
+  app.use(express.urlencoded({ extended: true, limit: '100kb' }));
+  app.use(sanitizeRequestInput);
 
   // Health check endpoint
   app.get('/health', (req, res) => {

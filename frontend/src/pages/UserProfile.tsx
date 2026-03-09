@@ -39,42 +39,42 @@ const BADGE_RULES = [
   {
     id: 'first-submission',
     name: 'First Steps',
-    icon: '🎯',
+    icon: 'FS',
     pointsRequired: 10,
     description: 'Submitted your first reference',
   },
   {
     id: 'verified-10',
     name: 'Verified 10',
-    icon: '✅',
+    icon: 'V10',
     pointsRequired: 100,
     description: '10 verified submissions',
   },
   {
     id: 'credible-source',
     name: 'Credible Source',
-    icon: '⭐',
+    icon: 'CS',
     pointsRequired: 200,
     description: 'High credibility score',
   },
   {
     id: 'power-user',
     name: 'Power User',
-    icon: '⚡',
+    icon: 'PU',
     pointsRequired: 300,
     description: '50+ submissions',
   },
   {
     id: 'expert',
     name: 'Expert',
-    icon: '🎓',
+    icon: 'EXP',
     pointsRequired: 500,
     description: 'Reach 500 points',
   },
   {
     id: 'top-contributor',
     name: 'Top Contributor',
-    icon: '🏆',
+    icon: 'TOP',
     pointsRequired: 1000,
     description: 'Elite contributor',
   },
@@ -104,13 +104,18 @@ interface Submission {
 
 const getCountryFlag = (country?: string) => {
   const flags: Record<string, string> = {
-    Botswana: '🇧🇼',
-    USA: '🇺🇸',
-    UK: '🇬🇧',
-    Kenya: '🇰🇪',
-    Nigeria: '🇳🇬',
+    BW: 'BW',
+    Botswana: 'BW',
+    US: 'US',
+    USA: 'US',
+    GB: 'GB',
+    UK: 'GB',
+    KE: 'KE',
+    Kenya: 'KE',
+    NG: 'NG',
+    Nigeria: 'NG',
   };
-  return country ? flags[country] ?? '🌍' : '🌍';
+  return country ? flags[country] ?? '--' : '--';
 };
 
 /* ------------------ COMPONENT ------------------ */
@@ -379,7 +384,7 @@ useEffect(() => {
                   {earnedBadges.length < BADGE_RULES.length ? (
                     <div>
                       <div className="flex items-center gap-4 mb-4">
-                        <div className="text-5xl">
+                        <div className="text-3xl font-semibold tracking-wide">
                           {BADGE_RULES[earnedBadges.length].icon}
                         </div>
                         <div className="flex-1">
@@ -406,7 +411,7 @@ useEffect(() => {
                   ) : (
                     <div className="text-center py-6">
                       <Trophy className="h-16 w-16 mx-auto mb-4 text-yellow-600" />
-                      <p className="font-bold text-lg mb-2">All Badges Earned! 🎉</p>
+                      <p className="font-bold text-lg mb-2">All Badges Earned</p>
                       <p className="text-gray-600">You've unlocked every achievement. Amazing work!</p>
                     </div>
                   )}
@@ -480,7 +485,7 @@ useEffect(() => {
                     }`}
                   >
                     <CardContent className="text-center pt-6">
-                      <div className="text-6xl mb-3">
+                      <div className="text-3xl font-semibold tracking-wide mb-3">
                         {badge.icon}
                       </div>
                       <p className="font-bold text-lg mb-1">{badge.name}</p>
@@ -495,7 +500,7 @@ useEffect(() => {
                       </div>
                       {earned ? (
                         <Badge className="bg-green-600 hover:bg-green-700">
-                          ✓ Earned
+                          Earned
                         </Badge>
                       ) : (
                         <Badge variant="outline" className="border-gray-400">

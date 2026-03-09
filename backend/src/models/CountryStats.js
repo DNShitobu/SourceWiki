@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { sanitizeString } from '../utils/sanitization.js';
 
 const countryStatsSchema = new mongoose.Schema({
   countryCode: {
@@ -10,7 +11,8 @@ const countryStatsSchema = new mongoose.Schema({
   countryName: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    set: sanitizeString
   },
   statistics: {
     totalSubmissions: { type: Number, default: 0 },
@@ -25,7 +27,10 @@ const countryStatsSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     },
-    username: String,
+    username: {
+      type: String,
+      set: sanitizeString,
+    },
     points: Number,
     verifiedSubmissions: Number
   }],
@@ -34,7 +39,10 @@ const countryStatsSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     },
-    username: String,
+    username: {
+      type: String,
+      set: sanitizeString,
+    },
     reviewsCompleted: Number,
     accuracy: Number // percentage of reviews that align with community consensus
   }],
@@ -55,7 +63,10 @@ const countryStatsSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     },
-    description: String
+    description: {
+      type: String,
+      set: sanitizeString,
+    }
   }],
   verifiers: [{
     userId: {
@@ -69,7 +80,8 @@ const countryStatsSchema = new mongoose.Schema({
     },
     specializations: [{
       type: String,
-      trim: true // e.g., "Academic journals", "Government sources", "News media"
+      trim: true,
+      set: sanitizeString, // e.g., "Academic journals", "Government sources", "News media"
     }],
     isActive: {
       type: Boolean,

@@ -29,6 +29,7 @@ import {
   getStatusColor,
 } from '../lib/mock-data';
 import { submissionApi } from '../lib/api';
+import { getSafeExternalUrl, openExternalUrl } from '../lib/safe-url';
 import { toast } from 'sonner';
 
 interface Submission {
@@ -97,7 +98,7 @@ export const AdminDashboard: React.FC = () => {
 
       if (response.success) {
         toast.success(
-          `Reference ${status === 'approved' ? '✅ Approved' : '❌ Rejected'} (+5 points)`
+          `Reference ${status === 'approved' ? 'Approved' : 'Rejected'} (+5 points)`
         );
         
         // Update user points locally
@@ -281,25 +282,25 @@ export const AdminDashboard: React.FC = () => {
                                 {getCountryFlag(submission.country)} {getCountryName(submission.country)}
                               </Badge>
                               <Badge variant="outline">
-                                {submission.mediaType === 'pdf' ? '📄 PDF' : '🔗 URL'}
+                                {submission.mediaType === 'pdf' ? 'PDF' : 'URL'}
                               </Badge>
                             </div>
-                            <a
-                              href={submission.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm text-blue-600 hover:underline block mb-2"
-                            >
-                              {submission.url}
+                              <a
+                                href={getSafeExternalUrl(submission.url) ?? undefined}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-600 hover:underline block mb-2"
+                              >
+                                {submission.url}
                             </a>
                             {submission.wikipediaArticle && (
                               <a
-                                href={submission.wikipediaArticle}
+                                href={getSafeExternalUrl(submission.wikipediaArticle) ?? undefined}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-sm text-gray-500 hover:underline block"
                               >
-                                📖 Wikipedia Article
+                                Wikipedia Article
                               </a>
                             )}
                             <p className="text-sm text-gray-500 mt-2">
@@ -320,7 +321,8 @@ export const AdminDashboard: React.FC = () => {
                         </Button>
                         <Button
                           variant="outline"
-                          onClick={() => window.open(submission.url, '_blank')}
+                          onClick={() => openExternalUrl(submission.url)}
+                          disabled={!getSafeExternalUrl(submission.url)}
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           View Source
@@ -353,9 +355,9 @@ export const AdminDashboard: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All categories</SelectItem>
-                <SelectItem value="primary">📗 Primary</SelectItem>
-                <SelectItem value="secondary">📘 Secondary</SelectItem>
-                <SelectItem value="unreliable">🚫 Unreliable</SelectItem>
+                <SelectItem value="primary">Primary</SelectItem>
+                <SelectItem value="secondary">Secondary</SelectItem>
+                <SelectItem value="unreliable">Unreliable</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -381,14 +383,14 @@ export const AdminDashboard: React.FC = () => {
                               : 'bg-red-100 text-red-800 border-red-300'
                           }
                         >
-                          {submission.reliability === 'credible' ? '✅ Credible' : '❌ Unreliable'}
+                          {submission.reliability === 'credible' ? 'Credible' : 'Unreliable'}
                         </Badge>
                         <Badge variant="outline">
                           {getCountryFlag(submission.country)} {getCountryName(submission.country)}
                         </Badge>
                       </div>
                       <a
-                        href={submission.url}
+                        href={getSafeExternalUrl(submission.url) ?? undefined}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm text-blue-600 hover:underline block mb-2"
@@ -439,7 +441,7 @@ export const AdminDashboard: React.FC = () => {
                   </Badge>
                 </div>
                 <a
-                  href={selectedSubmission.url}
+                  href={getSafeExternalUrl(selectedSubmission.url) ?? undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-blue-600 hover:underline"
@@ -474,14 +476,14 @@ export const AdminDashboard: React.FC = () => {
               onClick={() => selectedSubmission && handleVerify(selectedSubmission, 'approved', 'unreliable')}
               className="w-full sm:w-auto"
             >
-              🚫 Mark Unreliable
+              Mark Unreliable
             </Button>
             <Button
               variant="default"
               className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
               onClick={() => selectedSubmission && handleVerify(selectedSubmission, 'approved', 'credible')}
             >
-              ✅ Mark Credible
+              Mark Credible
             </Button>
           </DialogFooter>
         </DialogContent>

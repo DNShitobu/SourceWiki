@@ -3,6 +3,7 @@ import Submission from '../models/Submission.js';
 import CountryStats from '../models/CountryStats.js';
 import AppError from '../utils/AppError.js';
 import { ErrorCodes } from '../utils/errorCodes.js';
+import { buildSafeSearchRegex } from '../utils/sanitization.js';
 
 class CountryController {
   // ============================================================================
@@ -16,13 +17,14 @@ class CountryController {
       const limit = parseInt(req.query.limit) || 20;
       const skip = (page - 1) * limit;
       const sortBy = req.query.sortBy || 'submissions';
+      const searchRegex = buildSafeSearchRegex(req.query.search);
       
       // Build filter
       const filter = {};
-      if (req.query.search) {
+      if (searchRegex) {
         filter.$or = [
-          { countryName: { $regex: req.query.search, $options: 'i' } },
-          { countryCode: { $regex: req.query.search, $options: 'i' } }
+          { countryName: searchRegex },
+          { countryCode: searchRegex }
         ];
       }
       

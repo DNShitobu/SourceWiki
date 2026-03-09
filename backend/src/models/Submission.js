@@ -1,26 +1,31 @@
 import mongoose from 'mongoose';
+import { sanitizeString } from '../utils/sanitization.js';
 
 const submissionSchema = new mongoose.Schema({
   url: {
     type: String,
     required: [true, 'URL is required'],
-    trim: true
+    trim: true,
+    set: sanitizeString
   },
   title: {
     type: String,
     required: [true, 'Title is required'],
     trim: true,
+    set: sanitizeString,
     maxlength: [200, 'Title cannot exceed 200 characters']
   },
   publisher: {
     type: String,
     required: [true, 'Publisher is required'],
     trim: true,
+    set: sanitizeString,
     maxlength: [100, 'Publisher cannot exceed 100 characters']
   },
   country: {
     type: String,
-    required: [true, 'Country is required']
+    required: [true, 'Country is required'],
+    set: sanitizeString
   },
   category: {
     type: String,
@@ -54,11 +59,13 @@ const submissionSchema = new mongoose.Schema({
   },
   wikipediaArticle: {
     type: String,
-    trim: true
+    trim: true,
+    set: sanitizeString
   },
   verifierNotes: {
     type: String,
     trim: true,
+    set: sanitizeString,
     maxlength: [500, 'Notes cannot exceed 500 characters']
   },
   verifiedAt: {
@@ -70,11 +77,13 @@ const submissionSchema = new mongoose.Schema({
     default: 'url'
   },
   fileName: {
-    type: String
+    type: String,
+    set: sanitizeString
   },
   tags: [{
     type: String,
-    trim: true
+    trim: true,
+    set: sanitizeString
   }]
 }, {
   timestamps: true

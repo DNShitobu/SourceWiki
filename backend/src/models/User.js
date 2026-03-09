@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { sanitizeString } from '../utils/sanitization.js';
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -7,6 +8,7 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Username is required'],
     unique: true,
     trim: true,
+    set: sanitizeString,
     minlength: [3, 'Username must be at least 3 characters'],
     maxlength: [30, 'Username cannot exceed 30 characters']
   },
@@ -16,6 +18,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
     trim: true,
+    set: sanitizeString,
     match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email']
   },
   password: {
@@ -26,7 +29,8 @@ const userSchema = new mongoose.Schema({
   },
   country: {
     type: String,
-    required: [true, 'Country is required']
+    required: [true, 'Country is required'],
+    set: sanitizeString
   },
   role: {
     type: String,
@@ -38,8 +42,14 @@ const userSchema = new mongoose.Schema({
     default: 0
   },
   badges: [{
-    name: String,
-    icon: String,
+    name: {
+      type: String,
+      set: sanitizeString,
+    },
+    icon: {
+      type: String,
+      set: sanitizeString,
+    },
     earnedAt: {
       type: Date,
       default: Date.now
