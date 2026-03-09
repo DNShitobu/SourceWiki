@@ -2,7 +2,7 @@
 
 A community-driven reference verification platform for Wikipedia editors and Wikimedia contributors.
 
-## 🎯 Project Overview
+## Project Overview
 
 WikiSourceVerifier helps Wikipedia editors crowdsource and curate credible, country-based reference databases to support better citation practices on Wikipedia.
 
@@ -12,13 +12,13 @@ WikiSourceVerifier helps Wikipedia editors crowdsource and curate credible, coun
 - **Public Directory**: Searchable database of verified credible sources
 - **Community Metrics**: Gamification with points, badges, and leaderboards
 
-## 🏗️ Tech Stack
+## Tech Stack
 
 - **Frontend**: React + TypeScript, Vite, Tailwind CSS, shadcn/ui
 - **Backend**: Node.js + Express, MongoDB, JWT Authentication
 - **Development**: Hot reload, ESM modules, modern tooling
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before setting up the project, ensure you have:
 
@@ -54,7 +54,7 @@ brew services start mongodb/brew/mongodb-community
 # Or use MongoDB Atlas (cloud): https://www.mongodb.com/cloud/atlas
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Clone the Repository
 ```bash
@@ -136,7 +136,7 @@ npm run dev
 - **Backend API**: http://localhost:5000
 - **API Documentation**: http://localhost:5000/api (see backend/API_DOCUMENTATION.md)
 
-## 🛠️ Development
+## Development
 
 ### Available Scripts
 
@@ -179,7 +179,7 @@ wikisource-verifier/
 └── README.md
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### MongoDB Setup Options
 
@@ -207,7 +207,7 @@ brew services start mongodb-community
 | `FRONTEND_URL` | Frontend URL for CORS | http://localhost:5173 |
 | `VITE_API_URL` | Backend API URL | http://localhost:5000/api |
 
-## 🧪 Testing
+## Testing
 
 ### Manual Testing
 1. Start both backend and frontend servers
@@ -225,7 +225,7 @@ curl -X POST http://localhost:5000/api/auth/register \
   -d '{"email":"test@example.com","password":"password123","role":"contributor"}'
 ```
 
-## 🚨 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -259,13 +259,13 @@ rm -rf node_modules/.vite
 npm run dev
 ```
 
-## 📚 Additional Resources
+## Additional Resources
 
 - [API Documentation](backend/API_DOCUMENTATION.md)
 - [Frontend Guidelines](frontend/src/guidelines/Guidelines.md)
 - [Contributing Guidelines](#) (TODO)
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
@@ -273,13 +273,13 @@ npm run dev
 4. Push to branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
 
-## 🌍 Project Vision
+## Project Vision
 
 ### Core Features
 
@@ -288,9 +288,9 @@ Simple web form where contributors can:
 - Paste a URL or upload a reference (e.g., PDF, DOI, book info)
 - Select the country of origin
 - Suggest a category:
-  - 📗 Primary source (firsthand/original data)
-  - 📘 Secondary source (reporting or analysis)
-  - 🚫 Not reliable (blog, misinformation, biased source)
+  - Primary source (firsthand/original data)
+  - Secondary source (reporting or analysis)
+  - Not reliable (blog, misinformation, biased source)
 - Optionally link the Wikipedia article where it was used
 
 #### 2. Verification Dashboard (Country Admins)

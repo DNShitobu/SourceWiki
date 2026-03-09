@@ -9,7 +9,7 @@ Welcome to the WikiSourceVerifier end-of-year hack challenge! Below are the avai
 
 ---
 
-## 🔧 CODING TASKS
+## CODING TASKS
 
 ### Backend Development
 
@@ -144,7 +144,7 @@ Welcome to the WikiSourceVerifier end-of-year hack challenge! Below are the avai
 
 ---
 
-## 🐛 BUG FIXES & IMPROVEMENTS
+## BUG FIXES & IMPROVEMENTS
 
 ### Critical Fixes (1 point each)
 
@@ -233,16 +233,16 @@ Welcome to the WikiSourceVerifier end-of-year hack challenge! Below are the avai
 
 ## Important Workflow Rules
 
-⚠️ **CRITICAL**: Always check Phabricator before claiming a task to avoid conflicts!
+**CRITICAL**: Always check Phabricator before claiming a task to avoid conflicts!
 
-✅ **DO:**
+**DO:**
 - Check Phabricator dashboard first
 - Mark your task as claimed immediately
 - Communicate with mentors regularly
 - Test your code thoroughly
 - Write clear commit messages
 
-❌ **DON'T:**
+**DON'T:**
 - Start working without claiming in Phabricator
 - Work on already claimed tasks
 - Submit untested code
@@ -257,21 +257,21 @@ Welcome to the WikiSourceVerifier end-of-year hack challenge! Below are the avai
 
 ## Current System Status
 
-✅ **Working:**
+**Working:**
 - Backend API running on port 5000 with MongoDB connection
 - Frontend React app running on port 3000
 - User registration and authentication working
 - Basic submission endpoints functional
 - Database with sample data
 
-🔧 **Needs Immediate Attention:**
+**Needs Immediate Attention:**
 - Frontend still using mock data instead of real API calls
 - Authentication not fully integrated between frontend/backend
 - Form submissions not connecting to backend
 - Country dropdown missing countries (Ghana, etc.) - Task 32
 - Mobile responsiveness issues
 
-❌ **Missing/Incomplete:**
+**Missing/Incomplete:**
 - File upload functionality
 - Real-time features
 - Comprehensive testing
@@ -307,8 +307,8 @@ Welcome to the WikiSourceVerifier end-of-year hack challenge! Below are the avai
 
 ---
 
-**Good luck, and happy hacking! 🚀**
+**Good luck, and happy hacking!**
 
 *Remember: This hackathon is about learning, collaboration, and improving Wikipedia's source quality. Every contribution matters, no matter how small. Focus on coding tasks that improve functionality and fix bugs!*
 
-**Track your progress on Phabricator and celebrate your achievements! 🏆**
+**Track your progress on Phabricator and celebrate your achievements!**
