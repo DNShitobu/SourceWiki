@@ -1,4 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const buildApiUrl = (endpoint: string) => `${API_URL}${endpoint}`;
 
 interface ApiResponse<T = any> {
   success: boolean;
@@ -179,6 +180,14 @@ export const authApi = {
   login: (username: string, password: string) =>
     api.post('/auth/login', { username, password }),
 
+  getWikipediaStatus: () => api.get('/auth/wikipedia/status'),
+
+  getWikipediaLoginUrl: (returnTo = '/') => {
+    const url = new URL(buildApiUrl('/auth/wikipedia'));
+    url.searchParams.set('returnTo', returnTo);
+    return url.toString();
+  },
+
   logout: () => api.post('/auth/logout'),
 
   getMe: () => api.get('/auth/me'),
@@ -199,6 +208,13 @@ export const submissionApi = {
     country: string;
     category: string;
     wikipediaArticle?: string;
+    articleTitle?: string;
+    articleUrl?: string;
+    sectionTitle?: string;
+    referenceLabel?: string;
+    citationText?: string;
+    archiveUrl?: string;
+    accessDate?: string;
     fileType?: string;
     fileName?: string;
   }) => api.post('/submissions', data),
@@ -207,6 +223,8 @@ export const submissionApi = {
     country?: string;
     category?: string;
     status?: string;
+    reliability?: string;
+    claimed?: boolean;
     search?: string;
     page?: number;
     limit?: number;
@@ -229,6 +247,19 @@ export const submissionApi = {
 
   delete: (id: string) => api.delete(`/submissions/${id}`),
 
+  claim: (id: string) => api.post(`/submissions/${id}/claim`),
+
+  release: (id: string) => api.post(`/submissions/${id}/release`),
+
+  addDiscussion: (id: string, message: string) =>
+    api.post(`/submissions/${id}/discussion`, { message }),
+
+  appeal: (id: string, message: string) =>
+    api.post(`/submissions/${id}/appeal`, { message }),
+
+  resolveDiscussion: (id: string, discussionId: string, status = 'resolved') =>
+    api.put(`/submissions/${id}/discussion/${discussionId}/resolve`, { status }),
+
   verify: (id: string, status: string, credibility?: string, verifierNotes?: string) => {
     console.log('API verify call:', { id, status, credibility, verifierNotes });
     console.log('API URL being used:', `${API_URL}/submissions/${id}/verify`);
@@ -237,8 +268,8 @@ export const submissionApi = {
     return api.put(`/submissions/${id}/verify`, payload);
   },
 
-  getPendingForCountry: (page = 1, limit = 20) =>
-    api.get(`/submissions/pending/country?page=${page}&limit=${limit}`),
+  getPendingForCountry: (page = 1, limit = 20, queue = 'all') =>
+    api.get(`/submissions/pending/country?page=${page}&limit=${limit}&queue=${queue}`),
 
   getStats: (country?: string) => {
     const query = country ? `?country=${country}` : '';
@@ -249,6 +280,14 @@ export const submissionApi = {
 // User API
 export const userApi = {
   getProfile: (id: string) => api.get(`/users/${id}`),
+
+  getNotifications: (page = 1, limit = 10) =>
+    api.get(`/users/notifications?page=${page}&limit=${limit}`),
+
+  markNotificationRead: (notificationId: string) =>
+    api.put(`/users/notifications/${notificationId}/read`),
+
+  markAllNotificationsRead: () => api.put('/users/notifications/read-all'),
 
   getLeaderboard: (country?: string, limit = 20) => {
     const query = new URLSearchParams();
@@ -297,6 +336,38 @@ export const adminApi = {
     autoDetectCountry?: boolean;
     autoClassifyCategory?: boolean;
   }) => api.post('/admin/submissions/import/wikipedia', data),
+};
+
+export const reportsApi = {
+  getOverview: (params?: { startDate?: string; endDate?: string; country?: string }) => {
+    const query = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value) query.append(key, value);
+      });
+    }
+    return api.get(`/reports/overview?${query.toString()}`);
+  },
+
+  getCountry: (country: string, params?: { startDate?: string; endDate?: string }) => {
+    const query = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value) query.append(key, value);
+      });
+    }
+    return api.get(`/reports/country/${country}?${query.toString()}`);
+  },
+
+  getUser: (userId: string, params?: { startDate?: string; endDate?: string }) => {
+    const query = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value) query.append(key, value);
+      });
+    }
+    return api.get(`/reports/user/${userId}?${query.toString()}`);
+  },
 };
 
 export default api;

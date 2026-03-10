@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -7,9 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { useAuth } from '../lib/auth-context';
+import { authApi } from '../lib/api';
 import { COUNTRIES } from '../lib/mock-data';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Globe, Loader2 } from 'lucide-react';
 
 export const AuthPage: React.FC = () => {
   const navigate = useNavigate();
@@ -25,6 +26,23 @@ export const AuthPage: React.FC = () => {
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [registerCountry, setRegisterCountry] = useState('');
+  const [wikipediaConfigured, setWikipediaConfigured] = useState(false);
+  const [checkingWikipedia, setCheckingWikipedia] = useState(true);
+
+  useEffect(() => {
+    const loadWikipediaStatus = async () => {
+      try {
+        const response = await authApi.getWikipediaStatus();
+        setWikipediaConfigured(Boolean(response.configured));
+      } catch (error) {
+        setWikipediaConfigured(false);
+      } finally {
+        setCheckingWikipedia(false);
+      }
+    };
+
+    loadWikipediaStatus();
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +82,10 @@ export const AuthPage: React.FC = () => {
     }
   };
 
+  const handleWikipediaLogin = () => {
+    window.location.assign(authApi.getWikipediaLoginUrl('/'));
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
@@ -71,6 +93,41 @@ export const AuthPage: React.FC = () => {
           <h1 className="mb-2">Welcome to WikiSourceVerifier</h1>
           <p className="text-gray-600">Sign in or create an account to get started</p>
         </div>
+
+        <Card className="mb-6 border-blue-200 bg-blue-50/70">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-center gap-2">
+              <Globe className="h-5 w-5 text-blue-700" />
+              Continue with Wikipedia
+            </CardTitle>
+            <CardDescription className="text-center">
+              Sign in with your Wikimedia account and use the same SourceWiki roles and workflows.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-blue-300 bg-white"
+              onClick={handleWikipediaLogin}
+              disabled={checkingWikipedia || !wikipediaConfigured}
+            >
+              {checkingWikipedia ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Checking Wikipedia login...
+                </>
+              ) : (
+                'Login with Wikipedia'
+              )}
+            </Button>
+            <p className="text-center text-xs text-blue-900">
+              {wikipediaConfigured
+                ? 'Use your existing Wikipedia account. New Wikipedia-backed users start as contributors.'
+                : 'Wikipedia login is unavailable until the server is configured with Wikimedia OAuth credentials.'}
+            </p>
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2">

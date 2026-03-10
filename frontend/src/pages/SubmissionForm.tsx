@@ -25,6 +25,12 @@ export const SubmissionForm: React.FC = () => {
   const [country, setCountry] = useState('');
   const [category, setCategory] = useState<'primary' | 'secondary' | 'unreliable'>('secondary');
   const [wikipediaArticle, setWikipediaArticle] = useState('');
+  const [articleTitle, setArticleTitle] = useState('');
+  const [sectionTitle, setSectionTitle] = useState('');
+  const [referenceLabel, setReferenceLabel] = useState('');
+  const [citationText, setCitationText] = useState('');
+  const [archiveUrl, setArchiveUrl] = useState('');
+  const [accessDate, setAccessDate] = useState('');
   const [fileName, setFileName] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -82,6 +88,7 @@ export const SubmissionForm: React.FC = () => {
     const safeWikipediaArticle = wikipediaArticle
       ? getSafeExternalUrl(wikipediaArticle)
       : null;
+    const safeArchiveUrl = archiveUrl ? getSafeExternalUrl(archiveUrl) : null;
 
     if (submissionType === 'url' && !safeSourceUrl) {
       toast.error('Please enter a valid http or https URL');
@@ -90,6 +97,11 @@ export const SubmissionForm: React.FC = () => {
 
     if (wikipediaArticle && !safeWikipediaArticle) {
       toast.error('Please enter a valid Wikipedia article URL');
+      return;
+    }
+
+    if (archiveUrl && !safeArchiveUrl) {
+      toast.error('Please enter a valid archive URL');
       return;
     }
 
@@ -103,15 +115,23 @@ export const SubmissionForm: React.FC = () => {
         country,
         category,
         wikipediaArticle: safeWikipediaArticle || undefined,
+        articleTitle: articleTitle || undefined,
+        sectionTitle: sectionTitle || undefined,
+        referenceLabel: referenceLabel || undefined,
+        citationText: citationText || undefined,
+        archiveUrl: safeArchiveUrl || undefined,
+        accessDate: accessDate || undefined,
         fileType: submissionType,
         fileName: submissionType === 'pdf' ? fileName : undefined,
       });
 
       if (response.success) {
-        toast.success('Reference submitted successfully! (+10 points)');
-        
-        // Update user points locally
-        updateUser({ points: user.points + 10 });
+        if (response.duplicate) {
+          toast.success('That source already exists. Its Wikipedia context was merged into the existing record.');
+        } else {
+          toast.success('Reference submitted successfully! (+10 points)');
+          updateUser({ points: user.points + 10 });
+        }
       }
 
       // Reset form
@@ -121,10 +141,16 @@ export const SubmissionForm: React.FC = () => {
       setCountry('');
       setCategory('secondary');
       setWikipediaArticle('');
+      setArticleTitle('');
+      setSectionTitle('');
+      setReferenceLabel('');
+      setCitationText('');
+      setArchiveUrl('');
+      setAccessDate('');
       setFileName('');
 
       // Navigate to directory
-      setTimeout(() => navigate('/directory'), 1500);
+      setTimeout(() => navigate(response.duplicate && response.submission?.id ? `/submissions/${response.submission.id}` : '/directory'), 1500);
     } catch (error) {
       toast.error('Submission failed. Please try again.');
     } finally {
@@ -338,6 +364,71 @@ export const SubmissionForm: React.FC = () => {
               <p className="text-sm text-gray-500">
                 Link to the Wikipedia article where this source is used
               </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="article-title">Article Title (Optional)</Label>
+                <Input
+                  id="article-title"
+                  type="text"
+                  placeholder="OpenAI"
+                  value={articleTitle}
+                  onChange={(e) => setArticleTitle(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="section-title">Section Title (Optional)</Label>
+                <Input
+                  id="section-title"
+                  type="text"
+                  placeholder="History"
+                  value={sectionTitle}
+                  onChange={(e) => setSectionTitle(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reference-label">Reference Label (Optional)</Label>
+                <Input
+                  id="reference-label"
+                  type="text"
+                  placeholder="cite_note-14"
+                  value={referenceLabel}
+                  onChange={(e) => setReferenceLabel(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="access-date">Access Date (Optional)</Label>
+                <Input
+                  id="access-date"
+                  type="text"
+                  placeholder="2026-03-10"
+                  value={accessDate}
+                  onChange={(e) => setAccessDate(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="citation-text">Citation Text (Optional)</Label>
+              <Textarea
+                id="citation-text"
+                placeholder="Paste the citation text or the exact sentence being sourced."
+                value={citationText}
+                onChange={(e) => setCitationText(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="archive-url">Archive URL (Optional)</Label>
+              <Input
+                id="archive-url"
+                type="url"
+                placeholder="https://web.archive.org/..."
+                value={archiveUrl}
+                onChange={(e) => setArchiveUrl(e.target.value)}
+              />
             </div>
 
             <Alert>

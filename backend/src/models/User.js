@@ -14,8 +14,11 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, 'Email is required'],
+    required: function requiredEmail() {
+      return this.authProvider === 'local';
+    },
     unique: true,
+    sparse: true,
     lowercase: true,
     trim: true,
     set: sanitizeString,
@@ -23,13 +26,31 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
+    required: function requiredPassword() {
+      return this.authProvider === 'local';
+    },
     minlength: [6, 'Password must be at least 6 characters'],
     select: false
   },
   country: {
     type: String,
     required: [true, 'Country is required'],
+    default: 'GLOBAL',
+    set: sanitizeString
+  },
+  authProvider: {
+    type: String,
+    enum: ['local', 'wikipedia'],
+    default: 'local'
+  },
+  wikipediaUserId: {
+    type: String,
+    unique: true,
+    sparse: true,
+    set: sanitizeString
+  },
+  wikipediaUsername: {
+    type: String,
     set: sanitizeString
   },
   role: {
@@ -73,7 +94,7 @@ const userSchema = new mongoose.Schema({
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
+  if (!this.isModified('password') || !this.password) {
     return next();
   }
   
@@ -84,6 +105,10 @@ userSchema.pre('save', async function(next) {
 
 // Method to compare password
 userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!this.password) {
+    return false;
+  }
+
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
@@ -92,13 +117,15 @@ userSchema.methods.getPublicProfile = function() {
   return {
     id: this._id,
     username: this.username,
-    email: this.email,
+    email: this.email || '',
     country: this.country,
     role: this.role,
     points: this.points,
     badges: this.badges,
     joinDate: this.createdAt,
-    isActive: this.isActive
+    isActive: this.isActive,
+    authProvider: this.authProvider,
+    wikipediaUsername: this.wikipediaUsername || ''
   };
 };
 

@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import Submission from '../models/Submission.js';
+import Notification from '../models/Notification.js';
 import AppError from '../utils/AppError.js';
 import { ErrorCodes } from '../utils/errorCodes.js';
 import { buildSafeSearchRegex } from '../utils/sanitization.js';
@@ -232,6 +233,87 @@ export const activateUser = async (req, res, next) => {
       success: true,
       message: 'User activated successfully',
       user: user.getPublicProfile()
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get current user's notifications
+// @route   GET /api/users/notifications
+// @access  Private
+export const getMyNotifications = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const numericPage = parseInt(page, 10);
+    const numericLimit = parseInt(limit, 10);
+    const skip = (numericPage - 1) * numericLimit;
+
+    const [notifications, total, unreadCount] = await Promise.all([
+      Notification.find({ user: req.user.id })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(numericLimit),
+      Notification.countDocuments({ user: req.user.id }),
+      Notification.countDocuments({ user: req.user.id, readAt: null }),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      notifications,
+      unreadCount,
+      page: numericPage,
+      pages: Math.ceil(total / numericLimit),
+      total,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Mark one notification as read
+// @route   PUT /api/users/notifications/:notificationId/read
+// @access  Private
+export const markNotificationRead = async (req, res, next) => {
+  try {
+    const notification = await Notification.findOneAndUpdate(
+      {
+        _id: req.params.notificationId,
+        user: req.user.id,
+      },
+      { readAt: new Date() },
+      { new: true },
+    );
+
+    if (!notification) {
+      return next(new AppError('Notification not found', 404, ErrorCodes.RESOURCE_NOT_FOUND));
+    }
+
+    res.status(200).json({
+      success: true,
+      notification,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Mark all notifications as read
+// @route   PUT /api/users/notifications/read-all
+// @access  Private
+export const markAllNotificationsRead = async (req, res, next) => {
+  try {
+    await Notification.updateMany(
+      {
+        user: req.user.id,
+        readAt: null,
+      },
+      { readAt: new Date() },
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'All notifications marked as read',
     });
   } catch (error) {
     next(error);

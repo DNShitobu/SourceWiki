@@ -92,6 +92,46 @@ export const submissionValidation = [
     .trim()
     .isURL({ protocols: ['http', 'https'], require_protocol: true })
     .withMessage('Please provide a valid Wikipedia article URL'),
+  body('articleTitle')
+    .optional({ checkFalsy: true })
+    .trim()
+    .customSanitizer(sanitizeString)
+    .isLength({ max: 255 })
+    .withMessage('Article title cannot exceed 255 characters'),
+  body('articleUrl')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isURL({ protocols: ['http', 'https'], require_protocol: true })
+    .withMessage('Please provide a valid article URL'),
+  body('sectionTitle')
+    .optional({ checkFalsy: true })
+    .trim()
+    .customSanitizer(sanitizeString)
+    .isLength({ max: 255 })
+    .withMessage('Section title cannot exceed 255 characters'),
+  body('referenceLabel')
+    .optional({ checkFalsy: true })
+    .trim()
+    .customSanitizer(sanitizeString)
+    .isLength({ max: 120 })
+    .withMessage('Reference label cannot exceed 120 characters'),
+  body('citationText')
+    .optional({ checkFalsy: true })
+    .trim()
+    .customSanitizer(sanitizeString)
+    .isLength({ max: 500 })
+    .withMessage('Citation text cannot exceed 500 characters'),
+  body('archiveUrl')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isURL({ protocols: ['http', 'https'], require_protocol: true })
+    .withMessage('Please provide a valid archive URL'),
+  body('accessDate')
+    .optional({ checkFalsy: true })
+    .trim()
+    .customSanitizer(sanitizeString)
+    .isLength({ max: 40 })
+    .withMessage('Access date cannot exceed 40 characters'),
   body('fileType')
     .optional()
     .isIn(['url', 'pdf'])
@@ -143,6 +183,46 @@ export const submissionUpdateValidation = [
     .optional()
     .isIn(['primary', 'secondary', 'unreliable'])
     .withMessage('Category must be primary, secondary, or unreliable'),
+  body('articleTitle')
+    .optional({ checkFalsy: true })
+    .trim()
+    .customSanitizer(sanitizeString)
+    .isLength({ max: 255 })
+    .withMessage('Article title cannot exceed 255 characters'),
+  body('articleUrl')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isURL({ protocols: ['http', 'https'], require_protocol: true })
+    .withMessage('Please provide a valid article URL'),
+  body('sectionTitle')
+    .optional({ checkFalsy: true })
+    .trim()
+    .customSanitizer(sanitizeString)
+    .isLength({ max: 255 })
+    .withMessage('Section title cannot exceed 255 characters'),
+  body('referenceLabel')
+    .optional({ checkFalsy: true })
+    .trim()
+    .customSanitizer(sanitizeString)
+    .isLength({ max: 120 })
+    .withMessage('Reference label cannot exceed 120 characters'),
+  body('citationText')
+    .optional({ checkFalsy: true })
+    .trim()
+    .customSanitizer(sanitizeString)
+    .isLength({ max: 500 })
+    .withMessage('Citation text cannot exceed 500 characters'),
+  body('archiveUrl')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isURL({ protocols: ['http', 'https'], require_protocol: true })
+    .withMessage('Please provide a valid archive URL'),
+  body('accessDate')
+    .optional({ checkFalsy: true })
+    .trim()
+    .customSanitizer(sanitizeString)
+    .isLength({ max: 40 })
+    .withMessage('Access date cannot exceed 40 characters'),
 ];
 
 export const updateProfileValidation = [
@@ -183,6 +263,33 @@ export const badgeValidation = [
     .customSanitizer(sanitizeString)
     .isLength({ max: 20 })
     .withMessage('Badge icon cannot exceed 20 characters'),
+];
+
+export const discussionValidation = [
+  body('message')
+    .trim()
+    .customSanitizer(sanitizeString)
+    .notEmpty()
+    .withMessage('A discussion message is required')
+    .isLength({ max: 1000 })
+    .withMessage('Discussion messages cannot exceed 1000 characters'),
+];
+
+export const appealValidation = [
+  body('message')
+    .trim()
+    .customSanitizer(sanitizeString)
+    .notEmpty()
+    .withMessage('An appeal message is required')
+    .isLength({ max: 1000 })
+    .withMessage('Appeal messages cannot exceed 1000 characters'),
+];
+
+export const discussionResolveValidation = [
+  body('status')
+    .optional()
+    .isIn(['resolved', 'dismissed'])
+    .withMessage('Status must be resolved or dismissed'),
 ];
 
 export const wikipediaImportValidation = [

@@ -41,8 +41,16 @@ interface Submission {
   country: string;
   category: string;
   status: string;
+  credibility?: string;
+  reliability?: string;
+  mediaType?: string;
   submitter?: any;
   verifier?: any;
+  queue?: {
+    claimedBy?: any;
+    claimedByName?: string;
+    claimedAt?: string;
+  };
   wikipediaArticle?: string;
   verifierNotes?: string;
   verifiedAt?: string;
@@ -71,6 +79,7 @@ export const AdminDashboard: React.FC = () => {
   const [verificationNotes, setVerificationNotes] = useState('');
   const [filterDate, setFilterDate] = useState<string>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [queueFilter, setQueueFilter] = useState<string>('all');
   const [showDialog, setShowDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [wikipediaTitlesInput, setWikipediaTitlesInput] = useState('');
@@ -81,7 +90,7 @@ export const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     loadSubmissions();
-  }, [user]);
+  }, [user, queueFilter]);
 
   const loadSubmissions = async () => {
     if (!user) return;
@@ -90,7 +99,7 @@ export const AdminDashboard: React.FC = () => {
     try {
       // Load pending submissions for verifier's country
       if (user.role === 'verifier' || user.role === 'admin') {
-        const response = await submissionApi.getPendingForCountry();
+        const response = await submissionApi.getPendingForCountry(1, 50, queueFilter);
         if (response.success) {
           setSubmissions(response.submissions);
         }
@@ -139,6 +148,30 @@ export const AdminDashboard: React.FC = () => {
 
   const handleReject = async (submission: Submission) => {
     await handleVerify(submission, 'rejected');
+  };
+
+  const handleClaimSubmission = async (submissionId: string) => {
+    try {
+      const response = await submissionApi.claim(submissionId);
+      if (response.success) {
+        toast.success('Submission claimed');
+        await loadSubmissions();
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to claim submission');
+    }
+  };
+
+  const handleReleaseSubmission = async (submissionId: string) => {
+    try {
+      const response = await submissionApi.release(submissionId);
+      if (response.success) {
+        toast.success('Submission released');
+        await loadSubmissions();
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to release submission');
+    }
   };
 
   const handleWikipediaImport = async (
@@ -212,7 +245,7 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const getVerifiedSubmissions = () => {
-    let filtered = submissions.filter((s) => s.status === 'verified');
+    let filtered = submissions.filter((s) => s.status === 'approved');
 
     if (filterCategory !== 'all') {
       filtered = filtered.filter((s) => s.category === filterCategory);
@@ -234,8 +267,8 @@ export const AdminDashboard: React.FC = () => {
   const getStats = () => {
     const total = submissions.length;
     const pending = submissions.filter((s) => s.status === 'pending').length;
-    const verified = submissions.filter((s) => s.status === 'verified').length;
-    const credible = submissions.filter((s: any) => s.reliability === 'credible').length;
+    const verified = submissions.filter((s) => s.status === 'approved').length;
+    const credible = submissions.filter((s: any) => (s.reliability || s.credibility) === 'credible').length;
 
     return { total, pending, verified, credible };
   };
@@ -436,6 +469,19 @@ export const AdminDashboard: React.FC = () => {
         </TabsList>
 
         <TabsContent value="pending" className="space-y-4">
+          <div className="flex justify-end">
+            <Select value={queueFilter} onValueChange={setQueueFilter}>
+              <SelectTrigger className="w-[220px]">
+                <SelectValue placeholder="Queue filter" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All pending</SelectItem>
+                <SelectItem value="unclaimed">Unclaimed only</SelectItem>
+                <SelectItem value="claimed">Claimed only</SelectItem>
+                <SelectItem value="mine">Claimed by me</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           {pendingSubmissions.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
@@ -462,6 +508,11 @@ export const AdminDashboard: React.FC = () => {
                               </Badge>
                               <Badge variant="outline">
                                 {getCountryFlag(submission.country)} {getCountryName(submission.country)}
+                              </Badge>
+                              <Badge variant="outline">
+                                {submission.queue?.claimedByName
+                                  ? `Claimed by ${submission.queue.claimedByName}`
+                                  : 'Unclaimed'}
                               </Badge>
                               <Badge variant="outline">
                                 {submission.mediaType === 'pdf' ? 'PDF' : 'URL'}
@@ -492,7 +543,29 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="flex flex-col space-y-2 min-w-[160px]">
+                      <div className="flex flex-col space-y-2 min-w-[180px]">
+                        <Button
+                          variant="outline"
+                          onClick={() => navigate(`/submissions/${submission.id}`)}
+                        >
+                          Details
+                        </Button>
+                        {!submission.queue?.claimedBy && (
+                          <Button
+                            variant="secondary"
+                            onClick={() => handleClaimSubmission(submission.id)}
+                          >
+                            Claim
+                          </Button>
+                        )}
+                        {submission.queue?.claimedBy && (
+                          <Button
+                            variant="secondary"
+                            onClick={() => handleReleaseSubmission(submission.id)}
+                          >
+                            Release
+                          </Button>
+                        )}
                         <Button
                           variant="default"
                           className="bg-green-600 hover:bg-green-700"
@@ -560,12 +633,12 @@ export const AdminDashboard: React.FC = () => {
                         <Badge
                           variant="outline"
                           className={
-                            submission.reliability === 'credible'
-                              ? 'bg-green-100 text-green-800 border-green-300'
-                              : 'bg-red-100 text-red-800 border-red-300'
+                              submission.reliability === 'credible'
+                                ? 'bg-green-100 text-green-800 border-green-300'
+                                : 'bg-red-100 text-red-800 border-red-300'
                           }
                         >
-                          {submission.reliability === 'credible' ? 'Credible' : 'Unreliable'}
+                          {(submission.reliability || submission.credibility) === 'credible' ? 'Credible' : 'Unreliable'}
                         </Badge>
                         <Badge variant="outline">
                           {getCountryFlag(submission.country)} {getCountryName(submission.country)}

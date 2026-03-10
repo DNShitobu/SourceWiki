@@ -24,25 +24,50 @@ export const verifyRefreshToken = (token) => {
   }
 };
 
-export const sendTokenResponse = (user, statusCode, res) => {
+export const getAuthCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  maxAge: 7 * 24 * 60 * 60 * 1000
+});
+
+export const setAuthCookies = (res, accessToken, refreshToken) => {
+  const cookieOptions = getAuthCookieOptions();
+
+  return res
+    .cookie('token', accessToken, cookieOptions)
+    .cookie('refreshToken', refreshToken, cookieOptions);
+};
+
+export const clearAuthCookies = (res) => {
+  const cookieOptions = {
+    ...getAuthCookieOptions(),
+    expires: new Date(Date.now() + 10 * 1000),
+  };
+
+  return res
+    .cookie('token', 'none', cookieOptions)
+    .cookie('refreshToken', 'none', cookieOptions);
+};
+
+export const createAuthPayload = (user) => {
   const accessToken = generateAccessToken(user._id);
   const refreshToken = generateRefreshToken(user._id);
 
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  return {
+    accessToken,
+    refreshToken,
+    user: user.getPublicProfile()
   };
+};
 
-  res
+export const sendTokenResponse = (user, statusCode, res) => {
+  const authPayload = createAuthPayload(user);
+
+  setAuthCookies(res, authPayload.accessToken, authPayload.refreshToken)
     .status(statusCode)
-    .cookie('token', accessToken, cookieOptions)
-    .cookie('refreshToken', refreshToken, cookieOptions)
     .json({
       success: true,
-      accessToken,
-      refreshToken,
-      user: user.getPublicProfile()
+      ...authPayload
     });
 };

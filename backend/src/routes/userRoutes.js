@@ -5,6 +5,9 @@ import {
   awardBadge,
   updateUserRole,
   getUsers,
+  getMyNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
   deactivateUser,
   activateUser
 } from '../controllers/userController.js';
@@ -14,6 +17,9 @@ import { badgeValidation, validate } from '../middleware/validator.js';
 const router = express.Router();
 
 router.get('/leaderboard', getLeaderboard);
+router.get('/notifications', protect, getMyNotifications);
+router.put('/notifications/read-all', protect, markAllNotificationsRead);
+router.put('/notifications/:notificationId/read', protect, markNotificationRead);
 router.get('/', protect, authorize('admin'), getUsers);
 router.get('/:id', getUserProfile);
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import {
@@ -476,7 +477,9 @@ export const PublicDirectory: React.FC = () => {
                   </Tooltip>
                 </div>
                 <CardTitle className="text-lg line-clamp-2">
-                  {submission.title}
+                  <Link to={`/submissions/${submission.id}`} className="hover:underline">
+                    {submission.title}
+                  </Link>
                 </CardTitle>
                 <CardDescription>{submission.publisher}</CardDescription>
               </CardHeader>
@@ -522,22 +525,27 @@ export const PublicDirectory: React.FC = () => {
                   </Badge>
                 </div>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openExternalUrl(submission.url)}
-                      disabled={!getSafeExternalUrl(submission.url)}
-                      aria-label="Open source"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-sm">Open original source</p>
-                  </TooltipContent>
-                </Tooltip>
+                <div className="flex items-center gap-2">
+                  <Button asChild variant="outline" size="sm">
+                    <Link to={`/submissions/${submission.id}`}>Details</Link>
+                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openExternalUrl(submission.url)}
+                        disabled={!getSafeExternalUrl(submission.url)}
+                        aria-label="Open source"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-sm">Open original source</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
 
                 {submission.wikipediaArticle && (
                   <a
@@ -588,7 +596,9 @@ export const PublicDirectory: React.FC = () => {
                         <div className="max-w-xs">
                           <div className="flex items-center space-x-2">
                             <span>{getCategoryIcon(submission.category)}</span>
-                            <span className="truncate">{submission.title}</span>
+                            <Link to={`/submissions/${submission.id}`} className="truncate hover:underline">
+                              {submission.title}
+                            </Link>
                           </div>
                         </div>
                       </TableCell>
@@ -623,14 +633,19 @@ export const PublicDirectory: React.FC = () => {
                         {submission.verifiedDate}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openExternalUrl(submission.url)}
-                          disabled={!getSafeExternalUrl(submission.url)}
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button asChild variant="outline" size="sm">
+                            <Link to={`/submissions/${submission.id}`}>Details</Link>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openExternalUrl(submission.url)}
+                            disabled={!getSafeExternalUrl(submission.url)}
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

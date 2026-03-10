@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { authApi, api } from './api';
 import { toast } from 'sonner';
 
@@ -12,6 +12,8 @@ export interface User {
   badges: Array<{ name: string; icon: string; earnedAt: string }>;
   joinDate: string;
   isActive: boolean;
+  authProvider?: 'local' | 'wikipedia';
+  wikipediaUsername?: string;
 }
 
 interface AuthContextType {
@@ -21,6 +23,7 @@ interface AuthContextType {
   logout: () => void;
   register: (username: string, email: string, password: string, country: string) => Promise<boolean>;
   updateUser: (updates: Partial<User>) => void;
+  completeOAuthLogin: (accessToken?: string | null, refreshToken?: string | null) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,41 +32,68 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Check if user is logged in on mount
-    const checkAuth = async () => {
-      if (api.isAuthenticated()) {
-        try {
-          const response = await authApi.getMe();
-          setUser(response.user);
-        } catch (error) {
-          // Token invalid, clear auth
-          api.clearAuth();
-        }
+  const loadCurrentUser = async (clearStoredAuthOnFailure = false): Promise<boolean> => {
+    try {
+      const response = await authApi.getMe();
+      setUser(response.user);
+      return true;
+    } catch (error) {
+      setUser(null);
+
+      if (clearStoredAuthOnFailure) {
+        api.clearAuth();
       }
+
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const hasStoredAuth = api.isAuthenticated();
+      await loadCurrentUser(hasStoredAuth);
       setLoading(false);
     };
-    
+
     checkAuth();
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
       const response = await authApi.login(username, password);
-      
+
       if (response.success) {
         api.setTokens(response.accessToken, response.refreshToken);
         setUser(response.user);
         toast.success('Login successful!');
         return true;
       }
-      
+
       toast.error('Invalid credentials');
       return false;
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Login failed');
       return false;
     }
+  };
+
+  const completeOAuthLogin = async (
+    accessToken?: string | null,
+    refreshToken?: string | null
+  ): Promise<boolean> => {
+    if (accessToken && refreshToken) {
+      api.setTokens(accessToken, refreshToken);
+    }
+
+    const success = await loadCurrentUser(Boolean(accessToken || refreshToken));
+
+    if (success) {
+      toast.success('Wikipedia login successful!');
+      return true;
+    }
+
+    toast.error('Unable to complete Wikipedia login.');
+    return false;
   };
 
   const logout = async () => {
@@ -78,17 +108,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (username: string, email: string, password: string, country: string): Promise<boolean> => {
+  const register = async (
+    username: string,
+    email: string,
+    password: string,
+    country: string
+  ): Promise<boolean> => {
     try {
       const response = await authApi.register(username, email, password, country);
-      
+
       if (response.success) {
         api.setTokens(response.accessToken, response.refreshToken);
         setUser(response.user);
         toast.success('Registration successful!');
         return true;
       }
-      
+
       toast.error('Registration failed');
       return false;
     } catch (error) {
@@ -105,13 +140,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             updates.email || user.email,
             updates.country || user.country
           );
-          
+
           if (response.success) {
             setUser(response.user);
             toast.success('Profile updated successfully');
           }
         } else {
-          // For other updates like points, badges (from backend events)
           const updatedUser = { ...user, ...updates };
           setUser(updatedUser);
         }
@@ -122,7 +156,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, register, updateUser }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, logout, register, updateUser, completeOAuthLogin }}
+    >
       {children}
     </AuthContext.Provider>
   );

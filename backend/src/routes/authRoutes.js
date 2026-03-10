@@ -2,6 +2,9 @@ import express from 'express';
 import {
   register,
   login,
+  beginWikipediaLogin,
+  handleWikipediaCallback,
+  getWikipediaLoginStatus,
   logout,
   getMe,
   refreshToken,
@@ -21,6 +24,9 @@ const router = express.Router();
 
 router.post('/register', registerValidation, validate, register);
 router.post('/login', loginValidation, validate, login);
+router.get('/wikipedia/status', getWikipediaLoginStatus);
+router.get('/wikipedia', beginWikipediaLogin);
+router.get('/wikipedia/callback', handleWikipediaCallback);
 router.post('/logout', protect, logout);
 router.get('/me', protect, getMe);
 router.post('/refresh', refreshToken);

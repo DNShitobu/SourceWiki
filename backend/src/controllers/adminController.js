@@ -8,6 +8,13 @@ import {
   importWikipediaAllPagesBatch,
   importWikipediaArticles,
 } from '../services/wikipediaImportService.js';
+import {
+  appendSubmissionHistory,
+  buildSubmissionLink,
+  createHistoryEntry,
+  createNotification,
+  createNotificationHtml,
+} from '../services/submissionWorkflowService.js';
 
 class AdminController {
   // ============================================================================
@@ -346,22 +353,49 @@ class AdminController {
       const submissionId = req.params.id;
       const { status, adminNotes, reason } = req.body;
       
-      const submission = await Submission.findById(submissionId);
+      const submission = await Submission.findById(submissionId).populate('submitter', 'username email');
       if (!submission) {
         return next(new AppError('Submission not found', 404, ErrorCodes.RESOURCE_NOT_FOUND));
       }
       
-      // Store original values for audit
       const originalStatus = submission.status;
-      const originalVerifier = submission.verifier;
       
       // Update submission
       submission.status = status;
       submission.verifier = req.user._id;
       submission.verifiedAt = new Date();
       submission.verifierNotes = adminNotes;
+      appendSubmissionHistory(
+        submission,
+        createHistoryEntry({
+          action: 'admin_override',
+          actor: req.user._id,
+          actorName: req.user.username,
+          note: adminNotes || reason || 'Admin override applied.',
+          fromStatus: originalStatus,
+          toStatus: status,
+          metadata: { reason: reason || '' },
+        }),
+      );
       
       await submission.save();
+
+      if (submission.submitter) {
+        await createNotification({
+          userId: submission.submitter._id,
+          type: 'system',
+          title: 'An admin updated your submission',
+          message: `An admin changed "${submission.title}" from ${originalStatus} to ${status}.`,
+          link: buildSubmissionLink(submission._id),
+          email: submission.submitter.email,
+          emailSubject: 'Admin submission override',
+          emailHtml: createNotificationHtml({
+            heading: 'An admin updated your submission',
+            body: `"${submission.title}" was changed from ${originalStatus} to ${status}.`,
+            footer: adminNotes || reason || '',
+          }),
+        });
+      }
       
       res.json({ 
         message: 'Submission override successful', 

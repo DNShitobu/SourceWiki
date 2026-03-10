@@ -9,6 +9,9 @@ import { CountryNavigation } from "./components/CountryNavigation";
 import {
   LandingPage,
   AuthPage,
+  ReportsPage,
+  SubmissionDetailPage,
+  WikipediaAuthCallback,
   SubmissionForm,
   AdminDashboard,
   PublicDirectory,
@@ -48,9 +51,12 @@ function AppContent() {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/auth" element={<AuthPage />} />
+              <Route path="/auth/wikipedia/callback" element={<WikipediaAuthCallback />} />
+              <Route path="/reports" element={<ReportsPage />} />
               <Route path="/submit" element={<SubmissionForm />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/directory" element={<PublicDirectory />} />
+              <Route path="/submissions/:submissionId" element={<SubmissionDetailPage />} />
               <Route path="/profile" element={<UserProfile />} />
               <Route
                 path="/country/:countryCode"

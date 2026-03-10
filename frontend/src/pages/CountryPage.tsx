@@ -288,7 +288,9 @@ export const CountryPage: React.FC<CountryPageProps> = () => {
                       <div className="flex-1">
                         <CardTitle className="text-lg mb-2 flex items-center space-x-2">
                           <span>{getCategoryIcon(submission.category)}</span>
-                          <span>{submission.title}</span>
+                          <Link to={`/submissions/${submission.id}`} className="hover:underline">
+                            {submission.title}
+                          </Link>
                         </CardTitle>
                         <CardDescription className="space-y-1">
                           <div><strong>Publisher:</strong> {submission.publisher}</div>
@@ -325,15 +327,20 @@ export const CountryPage: React.FC<CountryPageProps> = () => {
                         <span>By {submission.submitterName}</span>
                         <Badge variant="outline">{submission.category}</Badge>
                       </div>
-                      <a
-                        href={getSafeExternalUrl(submission.url) ?? undefined}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm"
-                      >
-                        <span>View Source</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
+                      <div className="flex items-center gap-3">
+                        <Link to={`/submissions/${submission.id}`} className="text-sm text-blue-600 hover:text-blue-800">
+                          Details
+                        </Link>
+                        <a
+                          href={getSafeExternalUrl(submission.url) ?? undefined}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm"
+                        >
+                          <span>View Source</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
                     </div>
                     {submission.verifierNotes && (
                       <div className="mt-3 p-3 bg-gray-50 rounded-md">
@@ -365,7 +372,9 @@ export const CountryPage: React.FC<CountryPageProps> = () => {
                       <div className="flex-1">
                         <CardTitle className="text-lg mb-2 flex items-center space-x-2">
                           <span>{getCategoryIcon(submission.category)}</span>
-                          <span>{submission.title}</span>
+                          <Link to={`/submissions/${submission.id}`} className="hover:underline">
+                            {submission.title}
+                          </Link>
                         </CardTitle>
                         <CardDescription className="space-y-1">
                           <div><strong>Publisher:</strong> {submission.publisher}</div>
@@ -383,15 +392,20 @@ export const CountryPage: React.FC<CountryPageProps> = () => {
                         <span>By {submission.submitterName}</span>
                         <Badge variant="outline">{submission.category}</Badge>
                       </div>
-                      <a
-                        href={getSafeExternalUrl(submission.url) ?? undefined}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm"
-                      >
-                        <span>View Source</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
+                      <div className="flex items-center gap-3">
+                        <Link to={`/submissions/${submission.id}`} className="text-sm text-blue-600 hover:text-blue-800">
+                          Details
+                        </Link>
+                        <a
+                          href={getSafeExternalUrl(submission.url) ?? undefined}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm"
+                        >
+                          <span>View Source</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -416,7 +430,9 @@ export const CountryPage: React.FC<CountryPageProps> = () => {
                       <div className="flex-1">
                         <CardTitle className="text-lg mb-2 flex items-center space-x-2">
                           <span>{getCategoryIcon(submission.category)}</span>
-                          <span>{submission.title}</span>
+                          <Link to={`/submissions/${submission.id}`} className="hover:underline">
+                            {submission.title}
+                          </Link>
                         </CardTitle>
                         <CardDescription className="space-y-1">
                           <div><strong>Publisher:</strong> {submission.publisher}</div>
@@ -439,15 +455,20 @@ export const CountryPage: React.FC<CountryPageProps> = () => {
                         <span>By {submission.submitterName}</span>
                         <Badge variant="outline">{submission.category}</Badge>
                       </div>
-                      <a
-                        href={getSafeExternalUrl(submission.url) ?? undefined}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm"
-                      >
-                        <span>View Source</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
+                      <div className="flex items-center gap-3">
+                        <Link to={`/submissions/${submission.id}`} className="text-sm text-blue-600 hover:text-blue-800">
+                          Details
+                        </Link>
+                        <a
+                          href={getSafeExternalUrl(submission.url) ?? undefined}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm"
+                        >
+                          <span>View Source</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
                     </div>
                     {submission.verifierNotes && (
                       <div className="mt-3 p-3 bg-red-50 rounded-md border border-red-200">

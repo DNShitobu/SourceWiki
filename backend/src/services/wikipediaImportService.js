@@ -3,6 +3,14 @@ import { parse } from 'node-html-parser';
 import CountryStats from '../models/CountryStats.js';
 import Submission from '../models/Submission.js';
 import User from '../models/User.js';
+import {
+  appendSubmissionHistory,
+  buildArticleContext,
+  buildSourceFingerprint,
+  createHistoryEntry,
+  mergeArticleContext,
+  normalizeSourceUrl,
+} from './submissionWorkflowService.js';
 
 const WIKIPEDIA_API_URL = 'https://en.wikipedia.org/w/api.php';
 const DEFAULT_BATCH_LIMIT = 5;
@@ -184,25 +192,7 @@ const WIKIPEDIA_USER_AGENT =
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const normalizeExternalUrl = (value) => {
-  if (!value || typeof value !== 'string') {
-    return null;
-  }
-
-  const candidate = value.startsWith('//') ? `https:${value}` : value.trim();
-
-  try {
-    const parsed = new URL(candidate);
-
-    if (!['http:', 'https:'].includes(parsed.protocol)) {
-      return null;
-    }
-
-    return parsed.toString();
-  } catch {
-    return null;
-  }
-};
+const normalizeExternalUrl = (value) => normalizeSourceUrl(value);
 
 const normalizeArticleInput = (value) => {
   if (!value || typeof value !== 'string') {
@@ -521,6 +511,8 @@ const extractReferenceEntriesFromHtml = (html, articleTitle) => {
         coinsMetadata?.publisher ||
         extractFallbackPublisher(item, referenceUrl),
       citationType,
+      referenceLabel: trimImportedText(item.getAttribute('id'), 120),
+      citationText: trimImportedText(item.text, 500),
     };
     const existingEntry = referencesByUrl.get(referenceUrl);
 
@@ -539,6 +531,14 @@ const extractReferenceEntriesFromHtml = (html, articleTitle) => {
 
     if (!existingEntry.citationType && nextEntry.citationType) {
       existingEntry.citationType = nextEntry.citationType;
+    }
+
+    if (!existingEntry.referenceLabel && nextEntry.referenceLabel) {
+      existingEntry.referenceLabel = nextEntry.referenceLabel;
+    }
+
+    if (!existingEntry.citationText && nextEntry.citationText) {
+      existingEntry.citationText = nextEntry.citationText;
     }
   }
 
@@ -771,8 +771,21 @@ const buildSubmissionDocuments = ({ references, article, submitterId }) =>
       noteParts.push(`Auto-classified category ${reference.category}.`);
     }
 
+    const normalizedUrl = normalizeSourceUrl(reference.url);
+    const sourceFingerprint = buildSourceFingerprint(reference.url);
+    const articleContext = buildArticleContext({
+      articleTitle: article.title,
+      articleUrl: article.url,
+      referenceLabel: reference.referenceLabel,
+      citationText: reference.citationText,
+      source: 'wikipedia-import',
+    });
+
     return {
-      url: reference.url,
+      url: normalizedUrl || reference.url,
+      normalizedUrl,
+      sourceFingerprint,
+      sourceHostname: normalizedUrl ? new URL(normalizedUrl).hostname : undefined,
       title: reference.title || deriveReferenceTitle(reference.url, article.title),
       publisher: reference.publisher || derivePublisher(reference.url),
       country: reference.country,
@@ -782,6 +795,16 @@ const buildSubmissionDocuments = ({ references, article, submitterId }) =>
       submitter: submitterId,
       tags: ['wikipedia-import', 'enwiki', article.title],
       verifierNotes: noteParts.join(' '),
+      articleContexts: articleContext ? [articleContext] : [],
+      reviewHistory: [
+        createHistoryEntry({
+          action: 'imported',
+          actor: submitterId,
+          actorName: BOT_USERNAME,
+          note: `Imported automatically from English Wikipedia article "${article.title}".`,
+          toStatus: 'pending',
+        }),
+      ],
     };
   });
 
@@ -808,23 +831,58 @@ export const importWikipediaArticleReferences = async ({
     autoDetectCountry,
     autoClassifyCategory,
   });
-  const referenceUrls = preparedReferences.map((reference) => reference.url);
-
-  const existingSubmissions = await Submission.find({
-    wikipediaArticle: article.url,
-    url: { $in: referenceUrls },
-  }).select('url');
-
-  const existingUrls = new Set(existingSubmissions.map((submission) => submission.url));
-  const newReferences = preparedReferences.filter((reference) => !existingUrls.has(reference.url));
   const documents = buildSubmissionDocuments({
-    references: newReferences,
+    references: preparedReferences,
     article,
     submitterId,
   });
+  const fingerprints = documents
+    .map((document) => document.sourceFingerprint)
+    .filter(Boolean);
+  const existingSubmissions = await Submission.find({
+    sourceFingerprint: { $in: fingerprints },
+  });
+  const existingByFingerprint = new Map(
+    existingSubmissions.map((submission) => [submission.sourceFingerprint, submission]),
+  );
+  const newDocuments = [];
+  const newReferences = [];
+  let duplicateCount = 0;
 
-  if (documents.length > 0) {
-    await Submission.insertMany(documents, { ordered: false });
+  for (let index = 0; index < documents.length; index += 1) {
+    const document = documents[index];
+    const reference = preparedReferences[index];
+    const existingSubmission = existingByFingerprint.get(document.sourceFingerprint);
+
+    if (!existingSubmission) {
+      newDocuments.push(document);
+      newReferences.push(reference);
+      continue;
+    }
+
+    duplicateCount += 1;
+    existingSubmission.articleContexts = mergeArticleContext(
+      existingSubmission.articleContexts,
+      document.articleContexts[0],
+    );
+    appendSubmissionHistory(
+      existingSubmission,
+      createHistoryEntry({
+        action: 'duplicate_detected',
+        actor: submitterId,
+        actorName: BOT_USERNAME,
+        note: `Importer found the same source while processing "${article.title}".`,
+        metadata: {
+          articleTitle: article.title,
+          articleUrl: article.url,
+        },
+      }),
+    );
+    await existingSubmission.save();
+  }
+
+  if (newDocuments.length > 0) {
+    await Submission.insertMany(newDocuments, { ordered: false });
     await syncCountryStats(newReferences);
   }
 
@@ -833,8 +891,8 @@ export const importWikipediaArticleReferences = async ({
     wikipediaArticle: article.url,
     totalReferenceUrls: references.length,
     filteredOutReferences,
-    createdSubmissions: documents.length,
-    skippedSubmissions: preparedReferences.length - documents.length,
+    createdSubmissions: newDocuments.length,
+    skippedSubmissions: duplicateCount,
     countryAssignments,
   };
 };
