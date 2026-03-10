@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
+import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import {
@@ -28,7 +29,7 @@ import {
   getCountryName,
   getStatusColor,
 } from '../lib/mock-data';
-import { submissionApi } from '../lib/api';
+import { adminApi, submissionApi } from '../lib/api';
 import { getSafeExternalUrl, openExternalUrl } from '../lib/safe-url';
 import { toast } from 'sonner';
 
@@ -48,6 +49,18 @@ interface Submission {
   createdAt: string;
   updatedAt: string;
 }
+
+interface WikipediaImportResult {
+  mode: 'titles' | 'allpages';
+  processedArticles?: number;
+  requestedArticles?: number;
+  createdSubmissions: number;
+  skippedSubmissions: number;
+  filteredOutReferences?: number;
+  countryAssignments?: Record<string, number>;
+  nextContinueToken?: string | null;
+  failedArticles?: Array<{ article: string; error: string }>;
+}
 import { CheckCircle, XCircle, Eye, Clock, TrendingUp, Users, FileCheck } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
@@ -60,6 +73,11 @@ export const AdminDashboard: React.FC = () => {
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [showDialog, setShowDialog] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [wikipediaTitlesInput, setWikipediaTitlesInput] = useState('');
+  const [wikipediaBatchLimit, setWikipediaBatchLimit] = useState('5');
+  const [wikipediaContinueToken, setWikipediaContinueToken] = useState('');
+  const [wikipediaImportSummary, setWikipediaImportSummary] = useState<WikipediaImportResult | null>(null);
+  const [importingWikipedia, setImportingWikipedia] = useState(false);
 
   useEffect(() => {
     loadSubmissions();
@@ -121,6 +139,66 @@ export const AdminDashboard: React.FC = () => {
 
   const handleReject = async (submission: Submission) => {
     await handleVerify(submission, 'rejected');
+  };
+
+  const handleWikipediaImport = async (
+    mode: 'titles' | 'allpages',
+    options?: {
+      credibleOnly?: boolean;
+      autoDetectCountry?: boolean;
+      autoClassifyCategory?: boolean;
+      successLabel?: string;
+    },
+  ) => {
+    if (user?.role !== 'admin') {
+      toast.error('Only admins can run Wikipedia imports');
+      return;
+    }
+
+    const articleTitles = wikipediaTitlesInput
+      .split('\n')
+      .map((title) => title.trim())
+      .filter(Boolean);
+
+    if (mode === 'titles' && articleTitles.length === 0) {
+      toast.error('Enter at least one article title or English Wikipedia URL');
+      return;
+    }
+
+    setImportingWikipedia(true);
+
+    try {
+      const response = await adminApi.importWikipediaReferences({
+        mode,
+        articleTitles: mode === 'titles' ? articleTitles : undefined,
+        articleLimit: Number(wikipediaBatchLimit || 5),
+        allPagesContinue: mode === 'allpages' ? wikipediaContinueToken || undefined : undefined,
+        defaultCountry: 'GLOBAL',
+        defaultCategory: 'secondary',
+        credibleOnly: options?.credibleOnly,
+        autoDetectCountry: options?.autoDetectCountry,
+        autoClassifyCategory: options?.autoClassifyCategory,
+      });
+
+      const summary = response.result as WikipediaImportResult;
+      setWikipediaImportSummary(summary);
+
+      if (summary.nextContinueToken) {
+        setWikipediaContinueToken(summary.nextContinueToken);
+      }
+
+      toast.success(
+        options?.successLabel ||
+          `Imported ${summary.createdSubmissions} new references from ${summary.processedArticles ?? summary.requestedArticles ?? 0} articles`,
+      );
+
+      await loadSubmissions();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Wikipedia import failed';
+      toast.error(message);
+    } finally {
+      setImportingWikipedia(false);
+    }
   };
 
   const openVerificationDialog = (submission: Submission) => {
@@ -192,6 +270,110 @@ export const AdminDashboard: React.FC = () => {
           Review and verify reference submissions from the community
         </p>
       </div>
+
+      {user.role === 'admin' && (
+        <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Wikipedia Importer</CardTitle>
+              <CardDescription>
+              Import reference URLs from English Wikipedia articles into pending submissions, or run a stricter bot pass that keeps likely credible sources and auto-assigns source country.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Article titles or URLs</label>
+              <Textarea
+                placeholder={'OpenAI\nArtificial intelligence\nhttps://en.wikipedia.org/wiki/Wikipedia'}
+                value={wikipediaTitlesInput}
+                onChange={(e) => setWikipediaTitlesInput(e.target.value)}
+                rows={4}
+              />
+              <p className="text-sm text-gray-500">
+                Enter one English Wikipedia article title or `/wiki/...` URL per line.
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-[180px_1fr]">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">All-pages batch size</label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={25}
+                  value={wikipediaBatchLimit}
+                  onChange={(e) => setWikipediaBatchLimit(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">All-pages continuation token</label>
+                <Input
+                  value={wikipediaContinueToken}
+                  onChange={(e) => setWikipediaContinueToken(e.target.value)}
+                  placeholder="Leave blank for the first batch"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button
+                onClick={() => handleWikipediaImport('titles')}
+                disabled={importingWikipedia}
+              >
+                Import Listed Articles
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  handleWikipediaImport('titles', {
+                    credibleOnly: true,
+                    autoDetectCountry: true,
+                    autoClassifyCategory: true,
+                    successLabel: 'Harvested likely credible references with automatic country assignment',
+                  })
+                }
+                disabled={importingWikipedia}
+              >
+                Harvest Credible By Country
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleWikipediaImport('allpages')}
+                disabled={importingWikipedia}
+              >
+                Import Next All-Pages Batch
+              </Button>
+            </div>
+
+            {wikipediaImportSummary && (
+              <div className="rounded-lg border bg-gray-50 p-4 text-sm text-gray-700">
+                <p>
+                  Processed articles: {wikipediaImportSummary.processedArticles ?? wikipediaImportSummary.requestedArticles ?? 0}
+                </p>
+                <p>Created submissions: {wikipediaImportSummary.createdSubmissions}</p>
+                <p>Skipped duplicates: {wikipediaImportSummary.skippedSubmissions}</p>
+                {typeof wikipediaImportSummary.filteredOutReferences === 'number' && (
+                  <p>Filtered out as low-confidence: {wikipediaImportSummary.filteredOutReferences}</p>
+                )}
+                {wikipediaImportSummary.countryAssignments && (
+                  <p>
+                    Countries assigned: {Object.keys(wikipediaImportSummary.countryAssignments).length}
+                  </p>
+                )}
+                {wikipediaImportSummary.nextContinueToken && (
+                  <p className="break-all">
+                    Next continuation token: {wikipediaImportSummary.nextContinueToken}
+                  </p>
+                )}
+                {wikipediaImportSummary.failedArticles && wikipediaImportSummary.failedArticles.length > 0 && (
+                  <p>
+                    Failed articles: {wikipediaImportSummary.failedArticles.length}
+                  </p>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

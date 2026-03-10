@@ -1,6 +1,7 @@
 import express from 'express';
 import AdminController from '../controllers/adminController.js';
 import { protect, authorize } from '../middleware/auth.js';
+import { validate, wikipediaImportValidation } from '../middleware/validator.js';
 
 const router = express.Router();
 
@@ -21,5 +22,6 @@ router.delete('/users/:id', AdminController.deleteUser);
 router.get('/submissions', AdminController.getSubmissions);
 router.put('/submissions/:id/override', AdminController.overrideSubmission);
 router.delete('/submissions/:id', AdminController.deleteSubmission);
+router.post('/submissions/import/wikipedia', wikipediaImportValidation, validate, AdminController.importWikipediaReferences);
 
 export default router;

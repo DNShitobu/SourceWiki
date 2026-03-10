@@ -184,3 +184,76 @@ export const badgeValidation = [
     .isLength({ max: 20 })
     .withMessage('Badge icon cannot exceed 20 characters'),
 ];
+
+export const wikipediaImportValidation = [
+  body('mode')
+    .optional()
+    .isIn(['titles', 'allpages'])
+    .withMessage('Mode must be titles or allpages'),
+  body('articleTitle')
+    .optional({ checkFalsy: true })
+    .trim()
+    .customSanitizer(sanitizeString)
+    .isLength({ max: 255 })
+    .withMessage('Article title cannot exceed 255 characters'),
+  body('articleTitles')
+    .optional()
+    .isArray({ min: 1, max: 25 })
+    .withMessage('Article titles must be an array with 1 to 25 items'),
+  body('articleTitles.*')
+    .optional()
+    .trim()
+    .customSanitizer(sanitizeString)
+    .isLength({ min: 1, max: 255 })
+    .withMessage('Each article title must be between 1 and 255 characters'),
+  body('allPagesContinue')
+    .optional({ checkFalsy: true })
+    .trim()
+    .customSanitizer(sanitizeString)
+    .isLength({ max: 255 })
+    .withMessage('Continuation token cannot exceed 255 characters'),
+  body('articleLimit')
+    .optional()
+    .isInt({ min: 1, max: 25 })
+    .withMessage('Article limit must be between 1 and 25'),
+  body('defaultCountry')
+    .optional({ checkFalsy: true })
+    .trim()
+    .customSanitizer(sanitizeString)
+    .isLength({ max: 100 })
+    .withMessage('Default country cannot exceed 100 characters'),
+  body('defaultCategory')
+    .optional()
+    .isIn(['primary', 'secondary', 'unreliable'])
+    .withMessage('Default category must be primary, secondary, or unreliable'),
+  body('credibleOnly')
+    .optional()
+    .isBoolean()
+    .withMessage('credibleOnly must be a boolean')
+    .toBoolean(),
+  body('autoDetectCountry')
+    .optional()
+    .isBoolean()
+    .withMessage('autoDetectCountry must be a boolean')
+    .toBoolean(),
+  body('autoClassifyCategory')
+    .optional()
+    .isBoolean()
+    .withMessage('autoClassifyCategory must be a boolean')
+    .toBoolean(),
+  body().custom((value) => {
+    const mode = value.mode || 'titles';
+    const hasSingleTitle = Boolean(value.articleTitle);
+    const hasTitleArray = Array.isArray(value.articleTitles) && value.articleTitles.length > 0;
+
+    if (mode === 'allpages') {
+      return true;
+    }
+
+    if (!hasSingleTitle && !hasTitleArray) {
+      throw new Error('Provide articleTitle or articleTitles when mode is titles');
+    }
+
+    return true;
+  }),
+];

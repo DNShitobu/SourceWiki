@@ -284,4 +284,19 @@ export const userApi = {
   activate: (id: string) => api.put(`/users/${id}/activate`),
 };
 
+export const adminApi = {
+  importWikipediaReferences: (data: {
+    mode?: 'titles' | 'allpages';
+    articleTitle?: string;
+    articleTitles?: string[];
+    allPagesContinue?: string;
+    articleLimit?: number;
+    defaultCountry?: string;
+    defaultCategory?: 'primary' | 'secondary' | 'unreliable';
+    credibleOnly?: boolean;
+    autoDetectCountry?: boolean;
+    autoClassifyCategory?: boolean;
+  }) => api.post('/admin/submissions/import/wikipedia', data),
+};
+
 export default api;

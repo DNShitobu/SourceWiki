@@ -4,6 +4,10 @@ import CountryStats from '../models/CountryStats.js';
 import AppError from '../utils/AppError.js';
 import { ErrorCodes } from '../utils/errorCodes.js';
 import { buildSafeSearchRegex } from '../utils/sanitization.js';
+import {
+  importWikipediaAllPagesBatch,
+  importWikipediaArticles,
+} from '../services/wikipediaImportService.js';
 
 class AdminController {
   // ============================================================================
@@ -381,6 +385,55 @@ class AdminController {
       await Submission.findByIdAndDelete(submissionId);
       
       res.json({ message: 'Submission deleted successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async importWikipediaReferences(req, res, next) {
+    try {
+      const {
+        mode = 'titles',
+        articleTitle,
+        articleTitles = [],
+        allPagesContinue,
+        articleLimit = 5,
+        defaultCountry = 'GLOBAL',
+        defaultCategory = 'secondary',
+        credibleOnly = false,
+        autoDetectCountry = false,
+        autoClassifyCategory = false,
+      } = req.body;
+
+      const normalizedTitles = articleTitles.length > 0
+        ? articleTitles
+        : articleTitle
+          ? [articleTitle]
+          : [];
+
+      const result = mode === 'allpages'
+        ? await importWikipediaAllPagesBatch({
+            limit: Number(articleLimit),
+            continueToken: allPagesContinue,
+            defaultCountry,
+            defaultCategory,
+            credibleOnly,
+            autoDetectCountry,
+            autoClassifyCategory,
+          })
+        : await importWikipediaArticles({
+            articleInputs: normalizedTitles,
+            defaultCountry,
+            defaultCategory,
+            credibleOnly,
+            autoDetectCountry,
+            autoClassifyCategory,
+          });
+
+      res.status(200).json({
+        success: true,
+        result,
+      });
     } catch (error) {
       next(error);
     }
